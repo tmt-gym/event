@@ -92,7 +92,7 @@
         .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.9rem; margin-bottom: 12px; letter-spacing: -0.5px; }
         .rank-1 .rank-num-display, .rank-2 .rank-num-display, .rank-3 .rank-num-display { color: var(--gold); }
         .rank-4 .rank-num-display, .rank-5 .rank-num-display { color: var(--iron); }
-        .rank-cat { font-size: 1rem; color: var(--muted); font-weight: var(--weight-bold); margin-bottom: 4px; text-transform: uppercase; }
+        .rank-cat { font-size: 0.78rem; color: var(--muted); font-weight: var(--weight-regular); margin-bottom: 4px; text-transform: uppercase; }
         .rank-name { font-size: 1.3rem; font-weight: var(--weight-bold); margin-bottom: 20px; color: #FFF; letter-spacing: -0.5px; position: relative; }
         .rank-val-box { margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
         .rank-val { font-family: var(--font-num); font-size: 2.2rem; color: #FFF; line-height: 1; }
@@ -123,7 +123,7 @@
             .rank-header-left { display: flex; align-items: center; gap: 8px; }
             .rank-icon { width: 24px; height: 24px; margin: 0; display: inline-block; }
             .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.95rem; margin: 0; display: inline-block; }
-            .rank-cat { font-size: 1rem; font-weight: var(--weight-bold); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
+            .rank-cat { font-size: 0.78rem; font-weight: var(--weight-regular); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
             .rank-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px dashed #222; padding-top: 16px; }
             .rank-name { font-family: var(--font-body); font-size: 1.15rem; font-weight: var(--weight-bold); color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
             .rank-val-box { border: none; padding: 0; margin: 0; margin-top: 0; }
@@ -523,21 +523,22 @@
         .date-wrap { position: relative; }
         .date-wrap input[type="date"] {
             width: 100%;
+            height: 42px;
             cursor: pointer;
             color-scheme: dark;
             color: transparent;
             background: #1A1A1A;
             border: 1px solid #2a2a2a;
-            padding: 11px 14px;
+            padding: 0 14px;
             border-radius: 5px;
             font-size: 0.9rem;
             font-family: var(--font-body);
-            line-height: 1.5;
             outline: none;
             box-sizing: border-box;
             -webkit-appearance: none;
             appearance: none;
             transition: border-color 0.2s;
+            display: block;
         }
         .date-wrap input[type="date"]:focus { border-color: var(--red); }
         .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
@@ -548,7 +549,7 @@
             opacity: 0;
             cursor: pointer;
         }
-        .date-wrap input[type="date"]::-webkit-datetime-edit { display: none; } /* 크롬 내부 편집 레이어 숨김 */
+        .date-wrap input[type="date"]::-webkit-datetime-edit { display: none; }
         .date-wrap .date-display {
             position: absolute;
             inset: 0;
@@ -562,6 +563,53 @@
             gap: 6px;
         }
         .date-wrap .date-placeholder { color: #444; }
+
+        /* 일반 input도 height 고정으로 통일 */
+        .form-group input:not([type="date"]), .form-group select {
+            height: 42px;
+            padding: 0 14px;
+            box-sizing: border-box;
+        }
+        .form-group textarea { height: auto; padding: 11px 14px; }
+
+        /* ===== 모바일 UX 개선 ===== */
+        @media (max-width: 600px) {
+            /* 관리자 패널 탭 — 스크롤 가능하게 */
+            .adm-nav { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .adm-nav::-webkit-scrollbar { display: none; }
+            .adm-nav-btn { white-space: nowrap; padding: 12px 14px; font-size: 0.82rem; }
+
+            /* 폼 input/select 터치 최소 높이 */
+            .form-group input, .form-group select, .date-wrap input[type="date"] {
+                height: 46px;
+                font-size: 1rem; /* 모바일 자동확대 방지 (16px 이상) */
+            }
+            .form-group label { font-size: 0.72rem; }
+
+            /* form-row 모바일에서 1열 */
+            .form-row, .form-row.triple { grid-template-columns: 1fr; }
+
+            /* 버튼 터치 영역 확보 */
+            .btn { padding: 13px 20px; font-size: 0.9rem; }
+            .btn-icon { width: 38px; height: 38px; }
+
+            /* 필터 탭 */
+            .filter-tab { padding: 8px 12px; font-size: 0.8rem; }
+            .log-cat-btn { padding: 5px 11px; font-size: 0.72rem; }
+
+            /* 관리자 모달 */
+            .modal-window { border-radius: 0; }
+            .adm-panel { padding: 16px 16px 24px; }
+            .adm-header { padding: 16px 16px 0; }
+
+            /* 인라인 수정 폼 */
+            .inline-edit { flex-direction: column; }
+            .inline-edit input { width: 100% !important; }
+
+            /* ranking table 모바일 */
+            .ranking-table th:nth-child(3),
+            .ranking-table td:nth-child(3) { display: none; }
+        }
 
         /* 진행 중 미션 카드 (읽기 모드) */
         .mission-view-card {
@@ -806,17 +854,35 @@
     </section>
 
     <!-- 미션 종료 결과 섹션 (closed 상태일 때만 표시) -->
-    <section id="mission-result-section" style="display:none; background:var(--surface); padding:60px 0;">
+    <section id="mission-result-section" style="display:none; background:var(--surface); padding:50px 0;">
         <div class="container reveal">
-            <div style="text-align:center; margin-bottom:40px;">
-                <span class="mission-badge" style="background:#333; color:#aaa;">미션 종료</span>
-                <h2 class="mission-title" id="result-mission-name" style="margin-top:12px;"></h2>
-                <p class="mission-desc" style="margin-bottom:0;" id="result-mission-desc"></p>
+
+            <!-- 끝난 미션 정보 (작게) -->
+            <div style="text-align:center; margin-bottom:28px; opacity:0.45;">
+                <span style="display:inline-block; background:#222; color:#666; font-size:0.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:4px 10px; border-radius:3px; margin-bottom:10px;">미션 종료</span>
+                <div id="result-mission-name" style="font-family:'Pretendard',sans-serif; font-size:1rem; font-weight:700; color:#666; margin-bottom:4px;"></div>
+                <div id="result-mission-desc" style="font-family:'Pretendard',sans-serif; font-size:0.8rem; color:#444;"></div>
+            </div>
+
+            <!-- 다음 미션 안내 (크게, 눈에 띄게) -->
+            <div style="text-align:center; margin-bottom:40px; padding: 24px 20px; border: 1px solid #1e1e1e; border-radius:10px; background:#0d0d0d;">
+                <div style="font-size:1.6rem; margin-bottom:10px;">🥊</div>
+                <div style="font-family:'Pretendard',sans-serif; font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:6px;">다음 미션을 기다려주세요!</div>
+                <div style="font-family:'Pretendard',sans-serif; font-size:0.82rem; color:#555;">새로운 도전이 곧 시작됩니다</div>
+            </div>
+
+            <!-- 최종 랭킹 카테고리 탭 -->
+            <div style="margin-bottom:10px;">
+                <div style="font-family:'Pretendard',sans-serif; font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">최종 랭킹</div>
+                <div class="filter-tabs" id="result-cat-tabs">
+                    <button class="filter-tab active" onclick="setResultCat('all', this)">전체</button>
+                    <button class="filter-tab" onclick="setResultCat('adult-m', this)">성인부 남</button>
+                    <button class="filter-tab" onclick="setResultCat('adult-f', this)">성인부 여</button>
+                    <button class="filter-tab" onclick="setResultCat('student-m', this)">학생부 남</button>
+                    <button class="filter-tab" onclick="setResultCat('student-f', this)">학생부 여</button>
+                </div>
             </div>
             <div id="result-ranking-container" class="ranking-grid"></div>
-            <p style="text-align:center; margin-top:36px; font-size:0.88rem; color:#444; font-family:'Pretendard',sans-serif;">
-                다음 미션을 기다려주세요 🥊
-            </p>
         </div>
     </section>
 
@@ -1220,9 +1286,17 @@
         }
 
         // 미션 종료 후 최종 결과 랭킹 렌더링
+        let resultCatFilter = 'all';
+
+        function setResultCat(cat, btn) {
+            resultCatFilter = cat;
+            document.querySelectorAll('#result-cat-tabs .filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderResultRanking();
+        }
+
         function renderResultRanking() {
             const container = document.getElementById('result-ranking-container');
-            // MISSION_HISTORY 최신 항목(= 방금 끝난 미션)에서 결과 추출
             const latest = MISSION_HISTORY[0];
             if (!latest || !latest.finalRankings) {
                 container.innerHTML = `<div class="empty-state"><p class="empty-text">기록이 없습니다.</p></div>`;
@@ -1230,24 +1304,28 @@
             }
 
             const unit = latest.unit || '회';
-            // 전체 합산 후 점수 순 정렬
+            const fr   = latest.finalRankings;
+
+            // 카테고리 필터 적용
             let all = [];
-            Object.keys(latest.finalRankings).forEach(cat => {
-                (latest.finalRankings[cat] || []).forEach(e => all.push({ ...e, cat }));
-            });
+            if (resultCatFilter === 'all') {
+                Object.keys(CAT_NAMES).forEach(cat => (fr[cat] || []).forEach(e => all.push({ ...e, cat })));
+            } else {
+                (fr[resultCatFilter] || []).forEach(e => all.push({ ...e, cat: resultCatFilter }));
+            }
             all.sort((a, b) => b.val - a.val);
-            const top5 = all.slice(0, 5);
-            if (top5.length === 0) {
-                container.innerHTML = `<div class="empty-state"><p class="empty-text">기록이 없습니다.</p></div>`;
+
+            if (all.length === 0) {
+                container.innerHTML = `<div class="empty-state"><p class="empty-text">해당 카테고리에 기록이 없습니다.</p></div>`;
                 return;
             }
 
             const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
             let rank = 0, lastVal = -1, skip = 1;
-            container.innerHTML = top5.map((item, idx) => {
+            container.innerHTML = all.map((item, idx) => {
                 if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
                 lastVal = item.val;
-                return `<div class="rank-card rank-${rank} reveal">
+                return `<div class="rank-card rank-${Math.min(rank,5)} reveal">
                     <div class="rank-card-header">
                         <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${rank}순위</div></div>
                         <div class="rank-cat">${CAT_NAMES[item.cat] || ''}</div>
@@ -1510,37 +1588,6 @@
                 </table>`;
         }
 
-        function renderAdminChamps() {
-            const container = document.getElementById('champ-list-container');
-            if (CHAMPIONS.length === 0) {
-                container.innerHTML = `<div class="empty-state" style="margin-bottom:0;"><p class="empty-text">등록된 챔피언이 없습니다.</p></div>`;
-                return;
-            }
-            container.innerHTML = `
-                <table class="champ-table">
-                    <thead>
-                        <tr>
-                            <th>미션</th>
-                            <th>챔피언</th>
-                            <th>기록</th>
-                            <th style="width:80px">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${CHAMPIONS.map(c => `<tr>
-                            <td><span class="mission-tag">${c.mission}</span></td>
-                            <td>${c.name}</td>
-                            <td><span class="champ-score">${c.val}</span> <span style="font-size:0.8rem;color:var(--muted)">회</span></td>
-                            <td>
-                                <button class="btn-icon danger" onclick="deleteChamp('${c.id}')" title="삭제">
-                                    <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                                </button>
-                            </td>
-                        </tr>`).join('')}
-                    </tbody>
-                </table>`;
-        }
-
         function setAdminRankFilter(f, el) {
             adminRankFilter = f;
             document.querySelectorAll('#ranking-filter-tabs .filter-tab').forEach(b => b.classList.remove('active'));
@@ -1582,20 +1629,28 @@
         }
 
         function addRankingRecord() {
-            const cat = document.getElementById('adm-r-cat').value;
-            const name = document.getElementById('adm-r-name').value.trim();
-            const rawVal = document.getElementById('adm-r-val').value.trim();
-            const unit = SITE_STATE.mission.unit || '회';
-            // 분/초 단위면 문자열 그대로, 나머지는 숫자로 파싱
-            const val = unit === '분/초' ? rawVal : parseFloat(rawVal);
+            const cat    = document.getElementById('adm-r-cat').value;
+            const nameEl = document.getElementById('adm-r-name');
+            const valEl  = document.getElementById('adm-r-val');
+            const name   = nameEl.value.trim();
+            const rawVal = valEl.value.trim();
+            const unit   = SITE_STATE.mission.unit || '회';
+            const val    = unit === '분/초' ? rawVal : parseFloat(rawVal);
+
             if (!name || rawVal === '' || (unit !== '분/초' && isNaN(val))) {
                 showToast('⚠ 이름과 기록을 모두 입력하세요.'); return;
             }
+
             RANKINGS[cat].push({ id: uid(), name, val });
             saveData(); renderAll(); renderAdminRanking();
-            document.getElementById('adm-r-name').value = '';
-            document.getElementById('adm-r-val').value = '';
-            showToast(`✅ ${CAT_NAMES[cat]} — ${name} (${val}회) 추가됨`);
+
+            // 입력값 초기화 + 포커스 해제 (모바일 키보드 이슈 방지)
+            nameEl.value = '';
+            valEl.value  = '';
+            nameEl.blur();
+            valEl.blur();
+
+            showToast(`✅ ${CAT_NAMES[cat]} — ${name} (${val}${unit}) 추가됨`);
         }
 
         function toggleEditRanking(id, cat) {
@@ -1853,12 +1908,12 @@
         }
 
         function renderMissionPanel() {
-            if (hasMission()) {
-                // 카드 뷰 표시, 폼 숨김
-                showMissionViewMode();
-            } else {
-                // 빈 폼 표시
+            // 미션 없음 or 종료됨 → 새 미션 등록 폼
+            if (!hasMission() || SITE_STATE.mission.closed) {
                 showMissionEditMode(false);
+            } else {
+                // 진행 중 → 카드 뷰
+                showMissionViewMode();
             }
         }
 
