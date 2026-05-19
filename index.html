@@ -1547,40 +1547,21 @@
             if (data.length === 0) { container.innerHTML = `<div class="empty-state"><p class="empty-text">아직 도전 기록이 없습니다.</p></div>`; return; }
 
             let rank = 0, lastVal = -1, skip = 1;
-            const rows = data.map(item => {
+            const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
+            container.innerHTML = `<div class="ranking-grid">` + data.map(item => {
                 if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
                 lastVal = item.val;
-                return { ...item, rank };
-            });
-
-            const first = rows[0];
-            const rest  = rows.slice(1);
-
-            const firstCard = `
-                <div class="rt-first reveal">
-                    <div class="rt-first-num">1</div>
-                    <div class="rt-first-info">
-                        <div class="rt-first-cat">${first.catLabel}</div>
-                        <div class="rt-first-name">${first.name}</div>
+                return `<div class="rank-card rank-${rank} reveal">
+                    <div class="rank-card-header">
+                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${rank}순위</div></div>
+                        <div class="rank-cat">${item.catLabel}</div>
                     </div>
-                    <div class="rt-first-right">
-                        <span class="rt-first-val">${first.val}</span><span class="rt-first-unit">${unit}</span>
+                    <div class="rank-card-body">
+                        <div class="rank-name">${item.name}</div>
+                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">${unit}</span></div></div>
                     </div>
                 </div>`;
-
-            const listRows = rest.length > 0 ? `
-                <div class="rt-list reveal">
-                    ${rest.map(item => {
-                        const medalColor = item.rank === 2 ? '#C0C0C0' : item.rank === 3 ? '#CD7F32' : '#3a3a3a';
-                        return `<div class="rt-row">
-                            <span class="rt-num" style="color:${medalColor};">${item.rank}</span>
-                            <span class="rt-name">${item.name}<span class="rt-cat">${item.catLabel}</span></span>
-                            <span class="rt-val">${item.val}<span class="rt-unit">${unit}</span></span>
-                        </div>`;
-                    }).join('')}
-                </div>` : '';
-
-            container.innerHTML = firstCard + listRows;
+            }).join('') + `</div>`;
             document.querySelectorAll('#ranking-container .reveal').forEach(el => obs.observe(el));
         }
 
