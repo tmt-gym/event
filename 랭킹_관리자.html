@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>토마토복싱 챌린지 기록실</title>
+
+    <!-- Firebase SDK — head에서 먼저 로드 -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard-dynamic-subset.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --red: #CC0000;
+            --red-glow: rgba(204, 0, 0, 0.4);
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --iron: #A0A0A0;
+            --bg: #0A0A0A;
+            --surface: #111111;
+            --elevated: #1A1A1A;
+            --text: #EFEFEF;
+            --muted: #888888;
+            --border: #222222;
+            --font-display: 'Paperlogy', sans-serif;
+            --font-body: 'Pretendard', sans-serif;
+            --font-num: 'Bebas Neue', cursive;
+            --weight-regular: 400;
+            --weight-medium: 500;
+            --weight-semibold: 600;
+            --weight-bold: 700;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: var(--weight-regular); line-height: 1.5; overflow-x: hidden; font-size: 15px; }
+
+        .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .ranking-grid .reveal:nth-child(1) { transition-delay: 0.05s; }
+        .ranking-grid .reveal:nth-child(2) { transition-delay: 0.15s; }
+        .ranking-grid .reveal:nth-child(3) { transition-delay: 0.25s; }
+        .ranking-grid .reveal:nth-child(4) { transition-delay: 0.35s; }
+        .ranking-grid .reveal:nth-child(5) { transition-delay: 0.45s; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        section { padding: 80px 0; border-bottom: 1px solid var(--border); }
+
+        .hero-main { height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: radial-gradient(circle at center, #1a0000 0%, #0a0a0a 100%); border-bottom: 3px solid var(--red); }
+        .hero-brand { font-family: var(--font-num); font-size: 1.2rem; color: var(--red); letter-spacing: 6px; margin-bottom: 15px; }
+        .hero-main-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(2.2rem, 8vw, 4.5rem); line-height: 1.1; margin-bottom: 20px; word-break: keep-all; }
+        .hero-sub-text { font-size: clamp(0.9rem, 3vw, 1.1rem); color: var(--muted); font-weight: var(--weight-medium); letter-spacing: 1px; }
+
+        .mission-section { text-align: center; background: var(--surface); padding: 60px 0; }
+        .mission-badge { display: inline-block; background: var(--red); color: white; padding: 8px 18px; font-weight: var(--weight-bold); font-size: 1rem; border-radius: 4px; margin-bottom: 18px; }
+        .mission-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: 12px; color: #fff; word-break: keep-all; }
+        .mission-desc { color: var(--muted); max-width: 500px; margin: 0 auto 40px; font-size: clamp(0.95rem, 2.5vw, 1.1rem); font-weight: var(--weight-regular); word-break: keep-all; padding: 0 20px; }
+        
+        .info-box-group { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .info-box { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; max-width: 400px; padding: 20px; border-radius: 12px; transition: all 0.3s ease; background: #0a0a0a; border: 1px solid var(--border); }
+        .info-box.reward-glow { border: 1px solid var(--red); background: rgba(204, 0, 0, 0.03); box-shadow: 0 0 15px var(--red-glow), inset 0 0 10px var(--red-glow); animation: pulse-glow 3.5s infinite ease-in-out; }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px var(--red-glow), inset 0 0 10px var(--red-glow); } 50% { box-shadow: 0 0 25px var(--red-glow), inset 0 0 15px var(--red-glow); } }
+        .info-label { display: flex; align-items: center; gap: 6px; color: var(--red); font-weight: var(--weight-bold); font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; }
+        .info-value { display: flex; align-items: center; gap: 6px; font-size: clamp(1.3rem, 4vw, 1.65rem); font-weight: var(--weight-bold); letter-spacing: -0.5px; color: #FFFFFF; text-align: center; word-break: keep-all; }
+
+        .section-header { margin-bottom: 35px; }
+        .section-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.6rem, 5vw, 2.2rem); margin-bottom: 8px; }
+        .section-desc { color: var(--muted); font-size: 0.95rem; font-weight: var(--weight-regular); }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 40px; overflow-x: auto; padding: 5px 15px 15px; margin-left: -15px; margin-right: -15px; -webkit-overflow-scrolling: touch; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: var(--weight-bold); font-size: 0.95rem; white-space: nowrap; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .tab-btn:hover { color: var(--text); border-color: #555; }
+        .tab-btn.active { background: var(--red); color: white; border-color: var(--red); transform: scale(1.05); box-shadow: 0 5px 15px rgba(204, 0, 0, 0.3); }
+
+        .ranking-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; width: 100%; align-items: stretch; }
+        .rank-card-header { display: block; }
+        .rank-header-left { display: block; }
+        .rank-card-body { display: block; }
+        .rank-card { background: linear-gradient(145deg, #1a1a1a 0%, #111 100%); border: 1px solid var(--border); padding: 25px 15px; border-radius: 12px; position: relative; overflow: hidden; display: flex; flex-direction: column; text-align: center; min-height: 250px; transition: border-color 0.3s ease; }
+        .rank-card:hover { border-color: var(--muted); }
+        .rank-card.rank-1, .rank-card.rank-2, .rank-card.rank-3 { border: 1px solid rgba(255, 215, 0, 0.2); background: linear-gradient(145deg, #1e1a00 0%, #111 100%); }
+        .rank-card.rank-1 { border-color: var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .rank-card.rank-4, .rank-card.rank-5 { border: 1px solid rgba(160, 160, 160, 0.1); }
+        .rank-icon { width: 32px; height: 32px; margin: 0 auto 15px; display: block; }
+        .rank-1 .rank-icon, .rank-2 .rank-icon, .rank-3 .rank-icon { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3)); }
+        .rank-4 .rank-icon, .rank-5 .rank-icon { fill: var(--iron); }
+        .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.9rem; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .rank-1 .rank-num-display, .rank-2 .rank-num-display, .rank-3 .rank-num-display { color: var(--gold); }
+        .rank-4 .rank-num-display, .rank-5 .rank-num-display { color: var(--iron); }
+        .rank-cat { font-size: 1rem; color: var(--muted); font-weight: var(--weight-bold); margin-bottom: 4px; text-transform: uppercase; }
+        .rank-name { font-size: 1.3rem; font-weight: var(--weight-bold); margin-bottom: 20px; color: #FFF; letter-spacing: -0.5px; position: relative; }
+        .rank-val-box { margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .rank-val { font-family: var(--font-num); font-size: 2.2rem; color: #FFF; line-height: 1; }
+        .rank-1 .rank-val, .rank-2 .rank-val, .rank-3 .rank-val { color: var(--gold); }
+        .rank-unit { font-size: 1rem; color: var(--muted); margin-left: 4px; font-family: var(--font-body); font-weight: var(--weight-semibold); }
+
+        .champion-card { background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%); border: 1px solid #222; border-radius: 12px; padding: 20px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.4); min-height: 100px; transition: border-color 0.3s ease; }
+        .champion-card::before { content: ''; position: absolute; left: 0; top: 15%; bottom: 15%; width: 3px; background: var(--red); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--red); }
+        .champion-card:hover { border-color: #444; }
+        .champ-mission { font-size: clamp(0.95rem, 2vw, 1.05rem); color: var(--red); font-weight: var(--weight-bold); letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
+        .champ-name { font-family: var(--font-body); font-weight: var(--weight-bold); font-size: 1.15rem; color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .champ-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: auto; }
+        .champ-val-box { display: flex; align-items: flex-end; }
+        .champ-val { font-family: var(--font-num); font-size: 1.7rem; color: var(--gold); line-height: 1; }
+        .champ-unit { font-size: 0.75rem; color: var(--muted); margin-left: 2px; font-family: var(--font-body); font-weight: var(--weight-semibold); }
+
+        @media (max-width: 1100px) { .ranking-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .ranking-grid { grid-template-columns: repeat(2, 1fr); } .tabs { padding: 5px 15px 15px; margin-left: -15px; margin-right: -15px; gap: 8px; } .tab-btn { padding: 10px 14px; font-size: 1rem; } }
+        @media (max-width: 600px) {
+            section { padding: 50px 0; }
+            .ranking-grid { grid-template-columns: 1fr; gap: 12px; }
+            .mission-title { font-size: clamp(2.1rem, 6.5vw, 3.1rem); }
+            .info-value { font-size: clamp(1.35rem, 5vw, 1.85rem); }
+            .rank-card { background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%); border: 1px solid #222; border-radius: 12px; padding: 20px 20px; min-height: auto; display: flex; flex-direction: column; align-items: stretch; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+            .rank-card::before { display: none; }
+            .rank-card.rank-1::before, .rank-card.rank-2::before, .rank-card.rank-3::before { display: none; }
+            .rank-card-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px; }
+            .rank-header-left { display: flex; align-items: center; gap: 8px; }
+            .rank-icon { width: 24px; height: 24px; margin: 0; display: inline-block; }
+            .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.95rem; margin: 0; display: inline-block; }
+            .rank-cat { font-size: 1rem; font-weight: var(--weight-bold); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
+            .rank-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px dashed #222; padding-top: 16px; }
+            .rank-name { font-family: var(--font-body); font-size: 1.15rem; font-weight: var(--weight-bold); color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+            .rank-val-box { border: none; padding: 0; margin: 0; margin-top: 0; }
+            .rank-val { font-family: var(--font-num); font-size: 1.7rem; line-height: 1; }
+            .rank-bg-num { display: none; }
+        }
+        @media (max-width: 400px) { .rank-card { padding: 20px 16px; } }
+
+        .empty-state { grid-column: 1 / -1; padding: 80px 20px; text-align: center; background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 12px; }
+        .empty-text { color: var(--muted); }
+
+        /* ===== 관리자 버튼 (하단 고정) ===== */
+        .admin-fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        .admin-fab-btn {
+            background: var(--red);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 22px;
+            font-family: var(--font-body);
+            font-weight: var(--weight-bold);
+            font-size: 0.9rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 24px rgba(204,0,0,0.45);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .admin-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(204,0,0,0.55); }
+        .admin-fab-btn svg { width: 18px; height: 18px; fill: #fff; }
+
+        /* ===== 모달 공통 ===== */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
+        .modal-overlay.open { display: flex; }
+        .modal-window {
+            background: #111;
+            border-top: 3px solid var(--red);
+            width: 100%;
+            max-width: 720px;
+            margin: auto;
+            padding: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+
+        /* ===== 관리자 패널 탭 ===== */
+        .adm-header {
+            padding: 28px 32px 0;
+            border-bottom: 1px solid #1e1e1e;
+        }
+        .adm-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .adm-title {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+        }
+        .adm-close {
+            background: none;
+            border: 1px solid #333;
+            color: var(--muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .adm-close:hover { border-color: #666; color: #fff; }
+        .adm-nav {
+            display: flex;
+            gap: 0;
+        }
+        .adm-nav-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            padding: 12px 20px;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-weight: var(--weight-bold);
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .adm-nav-btn.active { color: var(--red); border-bottom-color: var(--red); }
+        .adm-nav-btn:hover { color: #fff; }
+
+        .adm-panel { display: none; padding: 28px 32px 32px; }
+        .adm-panel.active { display: block; }
+
+        /* ===== 폼 공통 ===== */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; font-weight: var(--weight-bold); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            background: #1A1A1A;
+            border: 1px solid #2a2a2a;
+            color: white;
+            padding: 11px 14px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-family: var(--font-body);
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--red); }
+        .form-group textarea { resize: vertical; min-height: 72px; }
+        .form-group select option { background: #1a1a1a; }
+
+        .btn { border: none; padding: 11px 20px; border-radius: 5px; font-weight: var(--weight-bold); cursor: pointer; font-size: 0.88rem; font-family: var(--font-body); transition: opacity 0.2s, transform 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary { background: var(--red); color: white; }
+        .btn-secondary { background: #2a2a2a; color: var(--text); }
+        .btn-danger { background: #3a1010; color: #ff6b6b; border: 1px solid #5a1a1a; }
+        .btn-warning { background: #2a2000; color: var(--gold); border: 1px solid #4a3800; }
+        .btn-full { width: 100%; justify-content: center; }
+        .btn svg { width: 15px; height: 15px; fill: currentColor; }
+
+        .section-divider { border: none; border-top: 1px solid #1e1e1e; margin: 24px 0; }
+
+        /* ===== 미션 패널 ===== */
+        .mission-status-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 0 6px var(--red);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .status-label { font-size: 0.8rem; font-weight: var(--weight-bold); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* ===== 랭킹 목록 테이블 ===== */
+        .ranking-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .ranking-table th { font-size: 0.75rem; color: var(--muted); font-weight: var(--weight-bold); text-align: left; padding: 8px 12px; border-bottom: 1px solid #1e1e1e; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ranking-table td { padding: 12px 12px; border-bottom: 1px solid #161616; font-size: 0.9rem; vertical-align: middle; }
+        .ranking-table tr:last-child td { border-bottom: none; }
+        .ranking-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .rank-badge { display: inline-block; font-family: var(--font-num); font-size: 1rem; min-width: 28px; text-align: center; }
+        .rank-badge.top { color: var(--gold); }
+        .rank-badge.mid { color: var(--iron); }
+        .cat-chip { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: var(--weight-bold); background: #1e1e1e; color: var(--muted); }
+        .hidden-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: var(--weight-bold); background: #2a2000; color: #888; margin-left: 6px; }
+        .action-btns { display: flex; gap: 6px; }
+        .btn-icon { background: none; border: 1px solid #2a2a2a; color: var(--muted); width: 32px; height: 32px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-icon:hover { border-color: #555; color: #fff; }
+        .btn-icon.danger:hover { border-color: #ff4444; color: #ff4444; }
+        .btn-icon.warn:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-icon svg { width: 14px; height: 14px; fill: currentColor; }
+
+        .add-record-form { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 8px; padding: 20px; margin-top: 20px; }
+        .add-form-title { font-size: 0.82rem; font-weight: var(--weight-bold); color: var(--red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+
+        /* 필터 탭 */
+        .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+        .filter-tab { background: #1a1a1a; border: 1px solid #2a2a2a; color: var(--muted); padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 0.82rem; font-weight: var(--weight-bold); transition: all 0.2s; }
+        .filter-tab.active { background: var(--red); color: #fff; border-color: var(--red); }
+        .filter-tab:hover:not(.active) { border-color: #444; color: #fff; }
+
+        /* 챔피언 패널 */
+        .champ-table { width: 100%; border-collapse: collapse; }
+        .champ-table th { font-size: 0.75rem; color: var(--muted); font-weight: var(--weight-bold); text-align: left; padding: 8px 12px; border-bottom: 1px solid #1e1e1e; text-transform: uppercase; letter-spacing: 0.5px; }
+        .champ-table td { padding: 14px 12px; border-bottom: 1px solid #161616; font-size: 0.9rem; vertical-align: middle; }
+        .champ-table tr:last-child td { border-bottom: none; }
+        .champ-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .mission-tag { display: inline-block; padding: 3px 10px; border-radius: 3px; font-size: 0.8rem; font-weight: var(--weight-bold); background: rgba(204,0,0,0.1); color: var(--red); border: 1px solid rgba(204,0,0,0.2); }
+        .champ-score { font-family: var(--font-num); font-size: 1.2rem; color: var(--gold); }
+
+        .info-banner { background: rgba(204,0,0,0.06); border: 1px solid rgba(204,0,0,0.15); border-radius: 6px; padding: 12px 16px; font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+        .info-banner strong { color: var(--red); }
+
+        /* 위험 구역 */
+        .danger-zone { background: rgba(255,50,50,0.04); border: 1px solid rgba(255,50,50,0.12); border-radius: 8px; padding: 20px; }
+        .danger-title { font-size: 0.8rem; font-weight: var(--weight-bold); color: #ff6b6b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .danger-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+
+        /* 로그인 모달 */
+        .login-window { max-width: 360px; text-align: center; }
+        .login-logo { font-family: var(--font-num); font-size: 1.4rem; color: var(--red); letter-spacing: 4px; margin-bottom: 6px; }
+        .login-subtitle { font-size: 0.82rem; color: var(--muted); margin-bottom: 28px; }
+
+        /* 인라인 에디트 */
+        .inline-edit { display: none; align-items: center; gap: 8px; padding: 8px 12px; background: #0d0d0d; border-radius: 6px; margin-top: 6px; }
+        .inline-edit.open { display: flex; flex-wrap: wrap; }
+        .inline-edit input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; font-family: var(--font-body); flex: 1; min-width: 80px; outline: none; }
+        .inline-edit input:focus { border-color: var(--red); }
+
+        /* ===== 챔피언 탄생 안내 배너 ===== */
+        .champ-announcement-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #CC0000;
+            border-radius: 8px;
+            padding: 13px 20px;
+            margin-bottom: 28px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: var(--weight-bold);
+            color: #fff;
+            letter-spacing: -0.2px;
+            word-break: keep-all;
+        }
+        .champ-banner-emoji { font-size: 1.1rem; line-height: 1; }
+
+        /* 챔피언 카드 NEW 배지 */
+        .champ-new-badge {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: var(--red);
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: var(--weight-bold);
+            font-family: var(--font-body);
+            letter-spacing: 1.5px;
+            padding: 2px 7px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        footer { text-align: center; padding: 40px 20px; color: #444; font-size: 0.8rem; border-top: 1px solid var(--border); }
+
+        /* ===== 미션 히스토리 =====  */
+        .history-section { margin-top: 8px; }
+        .history-section-title {
+            font-size: 0.82rem;
+            font-weight: var(--weight-bold);
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .history-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #1e1e1e;
+        }
+        .history-empty { color: #444; font-size: 0.85rem; padding: 16px 0; }
+        .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; padding-right: 4px; }
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #0d0d0d;
+            border: 1px solid #1e1e1e;
+            border-radius: 6px;
+            padding: 12px 14px;
+            transition: border-color 0.2s;
+        }
+        .history-item:hover { border-color: #333; }
+        .history-item-body { flex: 1; min-width: 0; }
+        .history-item-name {
+            font-weight: var(--weight-bold);
+            font-size: 0.9rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .history-item-meta { font-size: 0.75rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+        .history-item-date { color: #555; }
+        .history-champ-list { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+        .history-champ-chip {
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 3px;
+            background: rgba(255,215,0,0.07);
+            border: 1px solid rgba(255,215,0,0.15);
+            color: var(--gold);
+            font-weight: var(--weight-semibold);
+        }
+        .btn-load {
+            background: none;
+            border: 1px solid #333;
+            color: var(--muted);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: var(--weight-bold);
+            font-family: var(--font-body);
+            white-space: nowrap;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-load:hover { border-color: var(--red); color: var(--red); }
+        .btn-del-history {
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-del-history:hover { color: #ff4444; }
+        .btn-del-history svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* 주간 종료 확인 모달 */
+        .confirm-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .confirm-modal.open { display: flex; }
+        .confirm-window {
+            background: #111;
+            border-top: 3px solid var(--red);
+            width: 100%;
+            max-width: 460px;
+            padding: 32px;
+            border-radius: 6px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+        }
+        .confirm-icon { font-size: 2rem; margin-bottom: 14px; }
+        .confirm-title { font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; margin-bottom: 10px; }
+        .confirm-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+        .confirm-preview {
+            background: #0d0d0d;
+            border: 1px solid #1e1e1e;
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 22px;
+        }
+        .confirm-preview-title { font-size: 0.75rem; color: var(--muted); font-weight: var(--weight-bold); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .confirm-preview-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #161616; font-size: 0.85rem; }
+        .confirm-preview-row:last-child { border-bottom: none; }
+        .confirm-preview-cat { color: var(--muted); font-size: 0.78rem; }
+        .confirm-preview-winner { font-weight: var(--weight-bold); }
+        .confirm-preview-val { font-family: var(--font-num); font-size: 1rem; color: var(--gold); }
+        .confirm-btns { display: flex; gap: 10px; }
+
+        /* 빠른 불러오기 행 */
+        .quick-load-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: #0d0d0d;
+            border: 1px solid #1e1e1e;
+            border-radius: 7px;
+            padding: 10px 14px;
+            margin-bottom: 4px;
+        }
+        .quick-load-label {
+            font-size: 0.75rem;
+            font-weight: var(--weight-bold);
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .quick-load-inner { width: 100%; }
+        .quick-load-inner select {
+            width: 100%;
+            background: #161616;
+            border: 1px solid #2a2a2a;
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            font-family: var(--font-body);
+            outline: none;
+            cursor: pointer;
+        }
+        .quick-load-inner select:focus { border-color: var(--red); }
+
+        /* date input — 전체 영역 클릭 시 피커 오픈 */
+        .date-wrap { position: relative; }
+        .date-wrap input[type="date"] {
+            width: 100%;
+            cursor: pointer;
+            color-scheme: dark;
+            color: transparent;
+            background: #1A1A1A;
+            border: 1px solid #2a2a2a;
+            padding: 11px 14px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-family: var(--font-body);
+            line-height: 1.5;
+            outline: none;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: border-color 0.2s;
+        }
+        .date-wrap input[type="date"]:focus { border-color: var(--red); }
+        .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .date-wrap input[type="date"]::-webkit-datetime-edit { display: none; } /* 크롬 내부 편집 레이어 숨김 */
+        .date-wrap .date-display {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            font-size: 0.88rem;
+            font-family: var(--font-body);
+            color: var(--text);
+            pointer-events: none;
+            gap: 6px;
+        }
+        .date-wrap .date-placeholder { color: #444; }
+
+        /* 진행 중 미션 카드 (읽기 모드) */
+        .mission-view-card {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-left: 3px solid var(--red);
+            border-radius: 7px;
+            padding: 16px 18px;
+            margin-bottom: 4px;
+        }
+        .mission-view-top { display: flex; gap: 14px; align-items: flex-start; }
+        .mission-view-info { flex: 1; min-width: 0; }
+        .mission-view-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: var(--weight-bold);
+            color: var(--red);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .mission-view-name {
+            font-size: 1rem;
+            font-weight: var(--weight-bold);
+            color: #fff;
+            margin-bottom: 5px;
+            word-break: keep-all;
+        }
+        .mission-view-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .mv-sep { color: #333; }
+        .mission-view-desc {
+            font-size: 0.82rem;
+            color: #555;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        /* 자동 마감 안내 */
+        .auto-close-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            background: rgba(255,215,0,0.04);
+            border: 1px solid rgba(255,215,0,0.12);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        /* 미션 기록 로그 */
+        .log-item {
+            border: 1px solid #1a1a1a;
+            border-radius: 7px;
+            overflow: hidden;
+            margin-bottom: 6px;
+            transition: border-color 0.2s;
+        }
+        .log-item:hover { border-color: #2a2a2a; }
+        .log-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 14px;
+            cursor: pointer;
+            background: #0d0d0d;
+            gap: 10px;
+            user-select: none;
+        }
+        .log-item-header:hover { background: #101010; }
+        .log-item-left { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .log-item-name {
+            font-weight: var(--weight-bold);
+            font-size: 0.88rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+        .log-item-meta-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .log-meta-date { font-size: 0.72rem; color: #555; }
+        .log-meta-sep { color: #333; font-size: 0.72rem; }
+        .log-meta-reward { font-size: 0.72rem; color: #666; }
+        .log-toggle-icon {
+            width: 18px; height: 18px;
+            fill: #444;
+            flex-shrink: 0;
+            transition: transform 0.22s;
+        }
+        .log-item.open .log-toggle-icon { transform: rotate(180deg); }
+
+        /* 펼친 영역 */
+        .log-item-body {
+            display: none;
+            background: #080808;
+            padding: 10px 14px 12px;
+        }
+        .log-item.open .log-item-body { display: block; }
+
+        /* 카테고리 필터 — 초소형 */
+        .log-cat-filter {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .log-cat-btn {
+            background: none;
+            border: 1px solid #1e1e1e;
+            color: #555;
+            padding: 3px 9px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: var(--weight-bold);
+            font-family: var(--font-body);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .log-cat-btn:hover { border-color: #333; color: #888; }
+        .log-cat-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
+
+        /* 컴팩트 랭킹 리스트 */
+        .log-rank-list { display: flex; flex-direction: column; gap: 2px; }
+        .log-rank-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 4px 0;
+            border-bottom: 1px solid #0f0f0f;
+            font-family: 'Pretendard', sans-serif;
+        }
+        .log-rank-row:last-child { border-bottom: none; }
+        .log-rank-num { width: 30px; font-size: 0.72rem; color: #444; flex-shrink: 0; font-family: 'Pretendard', sans-serif; font-weight: 600; }
+        .log-rank-num.top1 { color: var(--gold); }
+        .log-rank-num.top2 { color: #aaa; }
+        .log-rank-num.top3 { color: #a0724a; }
+        .log-rank-name { flex: 1; font-size: 0.82rem; font-weight: 600; color: #ccc; font-family: 'Pretendard', sans-serif; }
+        .log-rank-cat { font-size: 0.65rem; color: #444; margin-left: 5px; font-weight: 400; font-family: 'Pretendard', sans-serif; }
+        .log-rank-val { font-size: 0.88rem; color: #888; font-family: 'Pretendard', sans-serif; font-weight: 600; }
+        .log-rank-unit { font-size: 0.65rem; color: #444; margin-left: 2px; font-family: 'Pretendard', sans-serif; font-weight: 400; }
+        .log-empty-cat { font-size: 0.75rem; color: #333; padding: 6px 0; font-family: 'Pretendard', sans-serif; }
+
+        /* 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e1e1e;
+            border: 1px solid #333;
+            color: var(--text);
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: var(--weight-medium);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 9999;
+            white-space: nowrap;
+            pointer-events: none;
+            border-left: 3px solid var(--red);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 600px) {
+            .adm-panel { padding: 20px 18px 24px; }
+            .adm-header { padding: 20px 18px 0; }
+            .form-row { grid-template-columns: 1fr; }
+            .form-row.triple { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loading-overlay" style="
+        position:fixed; inset:0; background:#0a0a0a;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        z-index:9999; gap:16px;
+    ">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CC0000" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </path>
+        </svg>
+        <span style="color:#555; font-family:'Pretendard',sans-serif; font-size:0.85rem; letter-spacing:1px;">데이터 불러오는 중...</span>
+    </div>
+
+    <!-- 히어로 -->
+    <header class="hero-main">
+        <div class="reveal">
+            <p class="hero-brand">TOMATO BOXING CLUB</p>
+            <h1 class="hero-main-title">토마토복싱<br><span style="color:var(--red)">주간 미션 챌린지</span></h1>
+            <p class="hero-sub-text">"한계를 넘어 당신의 열정을 증명하라"</p>
+        </div>
+    </header>
+
+    <!-- 미션 섹션 -->
+    <section class="mission-section">
+        <div class="container reveal">
+            <span class="mission-badge">현재 진행 미션</span>
+            <h2 class="mission-title" id="display-mission-name">샌드백 1분 타격</h2>
+            <p class="mission-desc" id="display-mission-desc">1분 동안 가장 많은 유효 타격수가 나오도록 기록하세요.</p>
+            <div class="info-box-group">
+                <div class="info-box">
+                    <div class="info-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>남은 시간</span>
+                    </div>
+                    <div class="info-value" id="timer-text"></div>
+                </div>
+                <div class="info-box reward-glow">
+                    <div class="info-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                        <span>1위 보상</span>
+                    </div>
+                    <div class="info-value" id="display-mission-reward">정품 노바 복싱 글러브</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 랭킹 섹션 -->
+    <section class="ranking-section">
+        <div class="container reveal">
+            <div class="section-header">
+                <h2 class="section-title">주간 실시간 랭킹</h2>
+                <p class="section-desc">현재 미션의 TOP5</p>
+            </div>
+            <div class="tabs" id="ranking-tabs">
+                <button class="tab-btn active" onclick="setRankingFilter('all')">전체</button>
+                <button class="tab-btn" onclick="setRankingFilter('adult-m')">성인부 남</button>
+                <button class="tab-btn" onclick="setRankingFilter('adult-f')">성인부 여</button>
+                <button class="tab-btn" onclick="setRankingFilter('student-m')">학생부 남</button>
+                <button class="tab-btn" onclick="setRankingFilter('student-f')">학생부 여</button>
+            </div>
+            <div class="ranking-grid" id="ranking-container"></div>
+        </div>
+    </section>
+
+    <!-- 역대 챔피언 -->
+    <section class="hall-of-fame" style="background:#050505;">
+        <div class="container reveal">
+            <div class="section-header">
+                <h2 class="section-title">미션별 역대 챔피언</h2>
+                <p class="section-desc">전설이 된 명예의 주인공들</p>
+            </div>
+            <!-- 챔피언 탄생 안내 배너 (1주일간 표시) -->
+            <div id="champ-announcement" style="display:none;"></div>
+            <div id="champions-container" class="ranking-grid"></div>
+        </div>
+    </section>
+
+    <footer><p>© 2025 TOMATO BOXING GYM. ALL RIGHTS RESERVED.</p></footer>
+
+    <!-- 관리자 FAB -->
+    <div class="admin-fab">
+        <button class="admin-fab-btn" onclick="openLogin()">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            관리자
+        </button>
+    </div>
+
+    <!-- 로그인 모달 -->
+    <div class="modal-overlay" id="login-modal" onclick="closeIfOverlay(event, 'login-modal')">
+        <div class="modal-window login-window">
+            <div style="padding: 36px 32px;">
+                <div class="login-logo">TMT ADMIN</div>
+                <div class="login-subtitle">관리자 전용 — 인증이 필요합니다</div>
+                <div class="form-group"><input type="password" id="admin-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter') checkLogin()"></div>
+                <button class="btn btn-primary btn-full" onclick="checkLogin()">인증하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리자 패널 모달 -->
+    <div class="modal-overlay" id="admin-modal" onclick="closeIfOverlay(event, 'admin-modal')">
+        <div class="modal-window">
+            <!-- 헤더 + 탭 -->
+            <div class="adm-header">
+                <div class="adm-header-top">
+                    <div class="adm-title">기록 관리 시스템</div>
+                    <button class="adm-close" onclick="closeAdmin()">✕</button>
+                </div>
+                <div class="adm-nav">
+                    <button class="adm-nav-btn active" onclick="switchPanel('panel-mission-reg', this)">미션 등록</button>
+                    <button class="adm-nav-btn" onclick="switchPanel('panel-ranking', this)">랭킹 관리</button>
+                    <button class="adm-nav-btn" onclick="switchPanel('panel-mission-log', this)">미션 기록</button>
+                    <button class="adm-nav-btn" onclick="switchPanel('panel-champ', this)">역대 챔피언</button>
+                </div>
+            </div>
+
+            <!-- 패널1: 미션 등록 -->
+            <div class="adm-panel active" id="panel-mission-reg">
+
+                <!-- [A] 진행 중 미션 카드 (읽기 모드) — JS로 show/hide -->
+                <div id="mission-view-mode" style="display:none;">
+                    <div class="mission-view-card">
+                        <div class="mission-view-top">
+                            <div class="mission-view-info">
+                                <div class="mission-view-badge">진행 중</div>
+                                <div class="mission-view-name" id="mv-name">—</div>
+                                <div class="mission-view-meta">
+                                    <span id="mv-date">—</span>
+                                    <span class="mv-sep">·</span>
+                                    <span id="mv-reward">—</span>
+                                    <span class="mv-sep">·</span>
+                                    <span id="mv-unit">—</span>
+                                </div>
+                                <div class="mission-view-desc" id="mv-desc">—</div>
+                            </div>
+                            <button class="btn btn-secondary" onclick="enterEditMode()" style="flex-shrink:0;align-self:flex-start;">
+                                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                수정
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- [B] 등록/수정 폼 (등록 모드 or 수정 모드) -->
+                <div id="mission-edit-mode">
+
+                    <!-- 과거 미션 불러오기 -->
+                    <div class="quick-load-row">
+                        <label class="quick-load-label">과거 미션 불러오기</label>
+                        <div class="quick-load-inner">
+                            <select id="quick-load-select" onchange="quickLoadMission(this.value)">
+                                <option value="">— 미션 선택 —</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mission-status-row" style="margin-top:18px;">
+                        <div class="status-dot"></div>
+                        <div class="status-label" id="edit-mode-label">새 미션 등록</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>미션명</label>
+                        <input type="text" id="adm-m-name" placeholder="미션 이름을 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label>상세 설명</label>
+                        <textarea id="adm-m-desc" placeholder="미션 설명을 입력하세요"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>1위 보상</label>
+                            <input type="text" id="adm-m-reward" placeholder="우승 보상 내용">
+                        </div>
+                        <div class="form-group">
+                            <label>미션 상태</label>
+                            <select id="adm-m-status">
+                                <option value="active">진행 중 (공개)</option>
+                                <option value="hidden">숨김 (비공개)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>시작일</label>
+                            <div class="date-wrap">
+                                <input type="date" id="adm-m-startdate" oninput="updateDateDisplay('adm-m-startdate','start-display')">
+                                <div class="date-display" id="start-display">
+                                    <svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                    <span class="date-placeholder">날짜 선택</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>종료일</label>
+                            <div class="date-wrap">
+                                <input type="date" id="adm-m-enddate" oninput="updateDateDisplay('adm-m-enddate','end-display')">
+                                <div class="date-display" id="end-display">
+                                    <svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                    <span class="date-placeholder">날짜 선택</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>기록 단위</label>
+                        <select id="adm-m-unit">
+                            <option value="회">회</option>
+                            <option value="분/초">분/초</option>
+                            <option value="개">개</option>
+                        </select>
+                    </div>
+
+                    <div style="display:flex;gap:8px;margin-bottom:12px;">
+                        <button class="btn btn-primary" style="flex:1;" onclick="saveMissionSettings()">
+                            <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:currentColor;"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zm-5 16a3 3 0 0 1 0-6 3 3 0 0 1 0 6zm3-10H5V5h10v4z"/></svg>
+                            저장
+                        </button>
+                        <button class="btn btn-secondary" id="edit-cancel-btn" style="display:none;" onclick="cancelEditMode()">취소</button>
+                    </div>
+
+                    <div class="auto-close-notice">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="flex-shrink:0;margin-top:1px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        종료일 23:59에 자동으로 마감되며, 카테고리별 1위가 역대 챔피언으로 등록됩니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 패널2: 미션 기록 -->
+            <div class="adm-panel" id="panel-mission-log">
+                <div class="info-banner">
+                    종료된 미션의 기록입니다. 미션을 클릭하면 최종 랭킹을 확인할 수 있습니다.
+                </div>
+                <div id="mission-log-list">
+                    <div class="history-empty">종료된 미션이 없습니다.</div>
+                </div>
+            </div>
+
+            <!-- 패널2: 랭킹 -->
+            <div class="adm-panel" id="panel-ranking">
+                <div class="info-banner">
+                    <strong>현재 미션</strong>에 대한 랭킹 기록을 관리합니다. 카테고리별로 필터링하여 기록을 추가·수정·삭제할 수 있습니다.
+                </div>
+
+                <!-- 기록 추가 폼 — 상단 -->
+                <div class="add-record-form" style="margin-bottom:20px;">
+                    <div class="add-form-title">+ 새 기록 추가</div>
+                    <div class="form-row triple">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>카테고리</label>
+                            <select id="adm-r-cat">
+                                <option value="adult-m">성인부 남</option>
+                                <option value="adult-f">성인부 여</option>
+                                <option value="student-m">학생부 남</option>
+                                <option value="student-f">학생부 여</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>이름</label>
+                            <input type="text" id="adm-r-name" placeholder="참가자 이름">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label id="adm-r-val-label">기록 (회)</label>
+                            <input type="number" id="adm-r-val" placeholder="숫자 입력">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="addRankingRecord()" style="margin-top:14px;">기록 추가</button>
+                </div>
+
+                <div class="filter-tabs" id="ranking-filter-tabs">
+                    <button class="filter-tab active" onclick="setAdminRankFilter('all', this)">전체</button>
+                    <button class="filter-tab" onclick="setAdminRankFilter('adult-m', this)">성인부 남</button>
+                    <button class="filter-tab" onclick="setAdminRankFilter('adult-f', this)">성인부 여</button>
+                    <button class="filter-tab" onclick="setAdminRankFilter('student-m', this)">학생부 남</button>
+                    <button class="filter-tab" onclick="setAdminRankFilter('student-f', this)">학생부 여</button>
+                </div>
+
+                <div id="ranking-list-container"></div>
+            </div>
+
+            <!-- 패널3: 역대 챔피언 -->
+            <div class="adm-panel" id="panel-champ">
+                <div class="info-banner">
+                    <strong>미션별 역대 챔피언</strong> 목록입니다. 미션별로 가장 높은 기록 1개만 공개 화면에 표시됩니다.<br>
+                    챔피언은 <strong>주간 종료 시 자동 등록</strong>되며, 잘못된 기록은 삭제할 수 있습니다.
+                </div>
+
+                <div id="champ-list-container">
+                    <!-- JS로 렌더링 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 주간 종료 확인 모달 -->
+    <div class="confirm-modal" id="confirm-modal">
+        <div class="confirm-window">
+            <div class="confirm-icon">🏆</div>
+            <div class="confirm-title">주간 미션 종료</div>
+            <div class="confirm-desc">
+                아래 카테고리별 1위 기록자가 <strong style="color:var(--gold)">역대 챔피언으로 자동 등록</strong>됩니다.<br>
+                현재 랭킹은 초기화되며, 미션은 히스토리에 보관됩니다.
+            </div>
+            <div class="confirm-preview">
+                <div class="confirm-preview-title">자동 등록될 챔피언 미리보기</div>
+                <div id="confirm-preview-body">—</div>
+            </div>
+            <div class="confirm-btns">
+                <button class="btn btn-secondary" style="flex:1;" onclick="closeConfirmModal()">취소</button>
+                <button class="btn btn-primary" style="flex:2;" onclick="confirmChampion()">확정 및 종료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== 데이터 =====
+        const CAT_NAMES = { 'adult-m': '성인부 남', 'adult-f': '성인부 여', 'student-m': '학생부 남', 'student-f': '학생부 여' };
+
+        const defaultMission = { 
+            name: '샌드백 1분 타격', 
+            description: '1분 동안 가장 많은 유효 타격수가 나오도록 기록하세요.',
+            reward: '정품 노바 복싱 글러브', 
+            endDate: new Date().getTime() + (5 * 24 * 60 * 60 * 1000),
+            status: 'active'
+        };
+        const defaultRankings = {
+            'adult-m': [{id: uid(), name: '김철수', val: 184}, {id: uid(), name: '이정진', val: 172}],
+            'adult-f': [{id: uid(), name: '박영희', val: 158}],
+            'student-m': [{id: uid(), name: '최민호', val: 165}, {id: uid(), name: '강성훈', val: 142}],
+            'student-f': [{id: uid(), name: '정지은', val: 135}]
+        };
+        const defaultChamps = [
+            { id: uid(), mission: '스피드 볼 타격', name: '홍길동', val: 210 },
+            { id: uid(), mission: '버피 테스트 1분', name: '이하나', val: 45 },
+            { id: uid(), mission: '미트 치기 유효타', name: '박태준', val: 198 }
+        ];
+
+        function uid() { return Math.random().toString(36).slice(2,9); }
+
+        // ===== Firebase 설정 =====
+        const FIREBASE_CONFIG = {
+            apiKey:            "AIzaSyAnTVYWbu-4KVUzHuvORNfv9s5H-wQjWOE",
+            authDomain:        "tmt-boxing.firebaseapp.com",
+            databaseURL:       "https://tmt-boxing-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId:         "tmt-boxing",
+            storageBucket:     "tmt-boxing.firebasestorage.app",
+            messagingSenderId: "1097469480470",
+            appId:             "1:1097469480470:web:f726c5c89d1816ea00ef37"
+        };
+
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const db = firebase.database();
+        const ROOT = db.ref('tmt');   // Firebase DB 최상위 경로
+
+        // ===== 로딩 오버레이 =====
+        function showLoading(on) {
+            document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
+        }
+
+        // ===== 저장 (Firebase에 쓰기) =====
+        function saveData() {
+            ROOT.set({
+                state:   SITE_STATE,
+                rankings: RANKINGS,
+                history: MISSION_HISTORY
+            }).catch(err => console.error('Firebase 저장 오류:', err));
+        }
+
+        // ===== 초기 데이터 로드 + 실시간 리스너 =====
+        let initialized = false;
+        ROOT.on('value', snapshot => {
+            const data = snapshot.val();
+            if (data) {
+                SITE_STATE      = data.state   || { mission: defaultMission };
+                RANKINGS        = data.rankings || defaultRankings;
+                MISSION_HISTORY = data.history  || [];
+            } else {
+                // 최초 접속 — 더미 데이터로 Firebase 초기화
+                SITE_STATE      = { mission: defaultMission };
+                RANKINGS        = defaultRankings;
+                MISSION_HISTORY = defaultHistory;
+                saveData();
+            }
+            if (!initialized) {
+                initialized = true;
+                showLoading(false);
+                renderAll();
+                document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+            } else {
+                // 다른 기기(관리자)가 저장했을 때 실시간 반영
+                renderAll();
+            }
+        });
+
+        const defaultHistory = [
+            {
+                id: uid(), name: '스피드볼 30초 최다타격', description: '30초 동안 스피드볼을 최대한 많이 타격하세요.',
+                reward: '프로틴 쉐이커 세트',
+                startDate: new Date('2025-05-05').getTime(),
+                endDate: new Date('2025-05-11').getTime(),
+                closedAt: new Date('2025-05-11').getTime(),
+                champions: [
+                    { cat: 'adult-m', name: '홍길동', val: 210 },
+                    { cat: 'adult-f', name: '이수진', val: 188 },
+                    { cat: 'student-m', name: '김민준', val: 195 },
+                    { cat: 'student-f', name: '박지아', val: 172 }
+                ],
+                finalRankings: {
+                    'adult-m': [{id:uid(),name:'홍길동',val:210},{id:uid(),name:'최준호',val:198},{id:uid(),name:'강태욱',val:185}],
+                    'adult-f': [{id:uid(),name:'이수진',val:188},{id:uid(),name:'강예은',val:175},{id:uid(),name:'윤채린',val:160}],
+                    'student-m': [{id:uid(),name:'김민준',val:195},{id:uid(),name:'오태양',val:181}],
+                    'student-f': [{id:uid(),name:'박지아',val:172},{id:uid(),name:'송하은',val:155}]
+                }
+            },
+            {
+                id: uid(), name: '버피 테스트 1분', description: '1분 동안 버피 동작을 최대한 많이 반복하세요.',
+                reward: '정품 레이어스 글러브',
+                startDate: new Date('2025-04-28').getTime(),
+                endDate: new Date('2025-05-04').getTime(),
+                closedAt: new Date('2025-05-04').getTime(),
+                champions: [
+                    { cat: 'adult-m', name: '박태준', val: 48 },
+                    { cat: 'adult-f', name: '이하나', val: 41 },
+                    { cat: 'student-m', name: '정우성', val: 45 },
+                    { cat: 'student-f', name: '김아린', val: 38 }
+                ],
+                finalRankings: {
+                    'adult-m': [{id:uid(),name:'박태준',val:48},{id:uid(),name:'신동혁',val:44},{id:uid(),name:'이준서',val:40}],
+                    'adult-f': [{id:uid(),name:'이하나',val:41},{id:uid(),name:'최유리',val:36}],
+                    'student-m': [{id:uid(),name:'정우성',val:45},{id:uid(),name:'류현진',val:40},{id:uid(),name:'한승민',val:37}],
+                    'student-f': [{id:uid(),name:'김아린',val:38},{id:uid(),name:'윤소희',val:35}]
+                }
+            },
+            {
+                id: uid(), name: '미트 치기 유효타', description: '2분간 코치 미트를 정확하게 타격한 횟수를 기록합니다.',
+                reward: '토마토복싱 공식 후드집업',
+                startDate: new Date('2025-04-21').getTime(),
+                endDate: new Date('2025-04-27').getTime(),
+                closedAt: new Date('2025-04-27').getTime(),
+                champions: [
+                    { cat: 'adult-m', name: '최성재', val: 198 },
+                    { cat: 'adult-f', name: '오유나', val: 162 }
+                ],
+                finalRankings: {
+                    'adult-m': [{id:uid(),name:'최성재',val:198},{id:uid(),name:'강동원',val:185},{id:uid(),name:'이준석',val:171},{id:uid(),name:'김재현',val:158}],
+                    'adult-f': [{id:uid(),name:'오유나',val:162},{id:uid(),name:'한지수',val:150}],
+                    'student-m': [],
+                    'student-f': []
+                }
+            }
+        ];
+
+        let MISSION_HISTORY = JSON.parse(localStorage.getItem('TMT_HISTORY_V8')) || defaultHistory;
+
+        let currentRankFilter = 'all';
+        let adminRankFilter = 'all';
+
+        // ===== 토스트 =====
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // ===== 뷰 렌더링 =====
+        function renderAll() { renderHero(); renderRankings(); renderChampions(); updateTimer(); }
+
+        function renderHero() {
+            document.getElementById('display-mission-name').innerText = SITE_STATE.mission.name;
+            document.getElementById('display-mission-desc').innerText = SITE_STATE.mission.description;
+            document.getElementById('display-mission-reward').innerText = SITE_STATE.mission.reward;
+            // 숨김 상태면 미션 섹션 반투명
+            document.querySelector('.mission-section').style.opacity = SITE_STATE.mission.status === 'hidden' ? '0.35' : '1';
+        }
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const diff = SITE_STATE.mission.endDate - now;
+
+            // 종료 시점 도달 + 아직 마감 안 된 미션이면 자동 마감
+            if (diff <= 0 && !SITE_STATE.mission.closed) {
+                autoCloseMission();
+                return;
+            }
+
+            if (diff <= 0) {
+                document.getElementById('timer-text').innerHTML = "미션 종료";
+                return;
+            }
+
+            const d = Math.floor(diff / (1000*60*60*24));
+            const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+            const s = Math.floor((diff % (1000*60)) / 1000);
+            document.getElementById('timer-text').innerHTML = `${d}일 ${h}시 ${m}분 ${s}초`;
+        }
+        setInterval(updateTimer, 1000);
+
+        // ===== 자동 마감 (UI confirm 없이 조용히 실행) =====
+        function autoCloseMission() {
+            const now = new Date().getTime();
+            const closedAt = now;
+
+            // 히스토리 아카이브 (finalRankings 전체 보관 — 챔피언은 여기서 동적 계산)
+            MISSION_HISTORY.unshift({
+                id: uid(),
+                name: SITE_STATE.mission.name,
+                description: SITE_STATE.mission.description,
+                reward: SITE_STATE.mission.reward,
+                unit: SITE_STATE.mission.unit || '회',
+                startDate: SITE_STATE.mission.startDate,
+                endDate: SITE_STATE.mission.endDate,
+                closedAt,
+                finalRankings: JSON.parse(JSON.stringify(RANKINGS))
+            });
+
+            // 전체 1위 추출 → 배너 안내용
+            let allEntries = [];
+            Object.keys(RANKINGS).forEach(cat => RANKINGS[cat].forEach(r => allEntries.push({ ...r, cat })));
+            allEntries.sort((a, b) => b.val - a.val);
+            const topEntry = allEntries[0];
+            if (topEntry) {
+                SITE_STATE.champAnnouncement = {
+                    missionName: SITE_STATE.mission.name,
+                    champions: [{ cat: topEntry.cat, name: topEntry.name, val: topEntry.val }],
+                    announcedAt: now
+                };
+            }
+
+            RANKINGS = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
+            SITE_STATE.mission.closed = true;
+
+            saveData();
+            renderAll();
+            document.getElementById('timer-text').innerHTML = "미션 종료";
+            showToast(topEntry ? `🏆 ${topEntry.name} 회원이 역대 챔피언으로 등록되었습니다.` : '⏰ 미션이 자동 종료되었습니다.');
+        }
+
+        function renderRankings() {
+            const container = document.getElementById('ranking-container');
+            let combined = [];
+            if (currentRankFilter === 'all') {
+                Object.keys(RANKINGS).forEach(cat => RANKINGS[cat].forEach(item => combined.push({...item, catLabel: CAT_NAMES[cat]})));
+            } else {
+                combined = RANKINGS[currentRankFilter].map(item => ({...item, catLabel: CAT_NAMES[currentRankFilter]}));
+            }
+            combined.sort((a,b) => b.val - a.val);
+            const data = combined.slice(0, 5);
+            if (data.length === 0) { container.innerHTML = `<div class="empty-state"><p class="empty-text">아직 도전 기록이 없습니다.</p></div>`; return; }
+            let rank = 0, lastVal = -1, skip = 1;
+            const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
+            container.innerHTML = data.map((item, idx) => {
+                if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
+                lastVal = item.val;
+                return `<div class="rank-card rank-${rank} reveal">
+                    <div class="rank-card-header">
+                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${rank}순위</div></div>
+                        <div class="rank-cat">${item.catLabel}</div>
+                    </div>
+                    <div class="rank-card-body">
+                        <div class="rank-name">${item.name}</div>
+                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">회</span></div></div>
+                    </div>
+                </div>`;
+            }).join('');
+            document.querySelectorAll('#ranking-container .reveal').forEach(el => obs.observe(el));
+        }
+
+        // ===== 미션 히스토리에서 미션명별 역대 최고 기록 1명 추출 =====
+        function getChampsByHistory() {
+            const byMission = {};
+            MISSION_HISTORY.forEach(m => {
+                const fr = m.finalRankings || {};
+                Object.keys(fr).forEach(cat => {
+                    (fr[cat] || []).forEach(entry => {
+                        const key = m.name;
+                        const val = typeof entry.val === 'number' ? entry.val : parseFloat(entry.val) || 0;
+                        if (!byMission[key] || val > byMission[key].val) {
+                            byMission[key] = {
+                                mission: m.name,
+                                name: entry.name,
+                                val,
+                                cat,
+                                unit: m.unit || '회',
+                                closedAt: m.closedAt
+                            };
+                        }
+                    });
+                });
+            });
+            return Object.values(byMission);
+        }
+
+        function renderChampions() {
+            const container = document.getElementById('champions-container');
+            const banner    = document.getElementById('champ-announcement');
+            const WEEK_MS   = 7 * 24 * 60 * 60 * 1000;
+            const ann       = SITE_STATE.champAnnouncement;
+            const now       = new Date().getTime();
+
+            // ① 챔피언 탄생 안내 배너 (1주일 이내)
+            if (ann && (now - ann.announcedAt) < WEEK_MS) {
+                const champName = ann.champions && ann.champions[0] ? ann.champions[0].name : '';
+                banner.innerHTML = `
+                    <div class="champ-announcement-banner">
+                        <span class="champ-banner-emoji">🏆</span>
+                        <span>${champName} 회원 역대 챔피언 등극!</span>
+                        <span class="champ-banner-emoji">🏆</span>
+                    </div>`;
+                banner.style.display = 'block';
+            } else {
+                banner.style.display = 'none';
+                banner.innerHTML = '';
+            }
+
+            // ② 히스토리에서 미션별 최고 기록 1명 추출
+            const champs = getChampsByHistory();
+            if (champs.length === 0) {
+                container.innerHTML = `<div class="empty-state"><p class="empty-text">첫 번째 챔피언에 도전하세요!</p></div>`;
+                return;
+            }
+            container.innerHTML = champs.map(c => {
+                const isNew = c.closedAt && (now - c.closedAt) < WEEK_MS;
+                return `
+                <div class="champion-card reveal">
+                    ${isNew ? `<span class="champ-new-badge">NEW</span>` : ''}
+                    <div class="champ-mission">${c.mission}</div>
+                    <div class="champ-card-body">
+                        <div class="champ-name">${c.name}</div>
+                        <div class="champ-val-box"><div class="champ-val">${c.val}<span class="champ-unit">${c.unit}</span></div></div>
+                    </div>
+                </div>`;
+            }).join('');
+            document.querySelectorAll('#champions-container .reveal').forEach(el => obs.observe(el));
+        }
+
+        function renderAdminChamps() {
+            const container = document.getElementById('champ-list-container');
+            const champs = getChampsByHistory();
+            if (champs.length === 0) {
+                container.innerHTML = `<div class="empty-state" style="margin-bottom:0;"><p class="empty-text">등록된 챔피언이 없습니다.</p></div>`;
+                return;
+            }
+            container.innerHTML = `
+                <table class="champ-table">
+                    <thead>
+                        <tr>
+                            <th>미션</th>
+                            <th>챔피언</th>
+                            <th>기록</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${champs.map(c => `<tr>
+                            <td><span class="mission-tag">${c.mission}</span></td>
+                            <td>${c.name}</td>
+                            <td><span class="champ-score">${c.val}</span> <span style="font-size:0.8rem;color:var(--muted)">${c.unit}</span></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function setRankingFilter(f) {
+            currentRankFilter = f;
+            document.querySelectorAll('#ranking-tabs .tab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(`'${f}'`)));
+            renderRankings();
+        }
+
+        // ===== 관리자 패널 렌더링 =====
+        function renderAdminRanking() {
+            const container = document.getElementById('ranking-list-container');
+            let rows = [];
+            const cats = adminRankFilter === 'all' ? Object.keys(RANKINGS) : [adminRankFilter];
+            cats.forEach(cat => {
+                const sorted = [...RANKINGS[cat]].sort((a,b) => b.val - a.val);
+                sorted.forEach((item, idx) => rows.push({...item, cat, rank: idx+1}));
+            });
+            rows.sort((a,b) => b.val - a.val);
+
+            if (rows.length === 0) {
+                container.innerHTML = `<div class="empty-state" style="margin-bottom:0;"><p class="empty-text">이 카테고리에 기록이 없습니다.</p></div>`;
+                return;
+            }
+            container.innerHTML = `
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">순위</th>
+                            <th>이름</th>
+                            <th>카테고리</th>
+                            <th>기록</th>
+                            <th style="width:100px">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map((item, idx) => {
+                            const rankClass = idx < 3 ? 'top' : 'mid';
+                            return `<tr id="row-${item.id}">
+                                <td><span class="rank-badge ${rankClass}">${idx+1}</span></td>
+                                <td>${item.name}</td>
+                                <td><span class="cat-chip">${CAT_NAMES[item.cat]}</span></td>
+                                <td><strong style="font-family:var(--font-num);font-size:1.1rem;">${item.val}</strong> 회</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon warn" onclick="toggleEditRanking('${item.id}', '${item.cat}')" title="수정">
+                                            <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                        </button>
+                                        <button class="btn-icon danger" onclick="deleteRanking('${item.id}', '${item.cat}')" title="삭제">
+                                            <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                        </button>
+                                    </div>
+                                    <div class="inline-edit" id="edit-${item.id}">
+                                        <input type="text" id="edit-name-${item.id}" value="${item.name}" placeholder="이름">
+                                        <input type="number" id="edit-val-${item.id}" value="${item.val}" placeholder="기록" style="width:80px;">
+                                        <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem;" onclick="saveEditRanking('${item.id}', '${item.cat}')">저장</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function renderAdminChamps() {
+            const container = document.getElementById('champ-list-container');
+            if (CHAMPIONS.length === 0) {
+                container.innerHTML = `<div class="empty-state" style="margin-bottom:0;"><p class="empty-text">등록된 챔피언이 없습니다.</p></div>`;
+                return;
+            }
+            container.innerHTML = `
+                <table class="champ-table">
+                    <thead>
+                        <tr>
+                            <th>미션</th>
+                            <th>챔피언</th>
+                            <th>기록</th>
+                            <th style="width:80px">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${CHAMPIONS.map(c => `<tr>
+                            <td><span class="mission-tag">${c.mission}</span></td>
+                            <td>${c.name}</td>
+                            <td><span class="champ-score">${c.val}</span> <span style="font-size:0.8rem;color:var(--muted)">회</span></td>
+                            <td>
+                                <button class="btn-icon danger" onclick="deleteChamp('${c.id}')" title="삭제">
+                                    <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                </button>
+                            </td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function setAdminRankFilter(f, el) {
+            adminRankFilter = f;
+            document.querySelectorAll('#ranking-filter-tabs .filter-tab').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderAdminRanking();
+        }
+
+        // ===== 단위 라벨 동기화 =====
+        function updateUnitLabel() {
+            const unit = SITE_STATE.mission.unit || '회';
+            const label = document.getElementById('adm-r-val-label');
+            const input = document.getElementById('adm-r-val');
+            if (label) label.textContent = `기록 (${unit})`;
+            if (input) {
+                if (unit === '분/초') {
+                    input.type = 'text';
+                    input.placeholder = '예: 1:23';
+                } else {
+                    input.type = 'number';
+                    input.placeholder = '숫자 입력';
+                }
+            }
+        }
+
+        // ===== 관리자 액션 =====
+        function saveMissionSettings() {
+            SITE_STATE.mission.name = document.getElementById('adm-m-name').value.trim();
+            SITE_STATE.mission.description = document.getElementById('adm-m-desc').value.trim();
+            SITE_STATE.mission.reward = document.getElementById('adm-m-reward').value.trim();
+            SITE_STATE.mission.status = document.getElementById('adm-m-status').value;
+            SITE_STATE.mission.unit = document.getElementById('adm-m-unit').value;
+            const startVal = document.getElementById('adm-m-startdate').value;
+            const endVal = document.getElementById('adm-m-enddate').value;
+            if (startVal) SITE_STATE.mission.startDate = new Date(startVal).getTime();
+            if (endVal) SITE_STATE.mission.endDate = new Date(endVal).getTime() + (23*60*60*1000 + 59*60*1000); // 해당 날 23:59
+            SITE_STATE.mission.closed = false;  // 새 미션 저장 시 자동 마감 플래그 초기화
+            saveData(); renderAll(); updateUnitLabel(); renderMissionPanel();
+            showToast('✅ 미션 정보가 업데이트되었습니다.');
+        }
+
+        function addRankingRecord() {
+            const cat = document.getElementById('adm-r-cat').value;
+            const name = document.getElementById('adm-r-name').value.trim();
+            const rawVal = document.getElementById('adm-r-val').value.trim();
+            const unit = SITE_STATE.mission.unit || '회';
+            // 분/초 단위면 문자열 그대로, 나머지는 숫자로 파싱
+            const val = unit === '분/초' ? rawVal : parseFloat(rawVal);
+            if (!name || rawVal === '' || (unit !== '분/초' && isNaN(val))) {
+                showToast('⚠ 이름과 기록을 모두 입력하세요.'); return;
+            }
+            RANKINGS[cat].push({ id: uid(), name, val });
+            saveData(); renderAll(); renderAdminRanking();
+            document.getElementById('adm-r-name').value = '';
+            document.getElementById('adm-r-val').value = '';
+            showToast(`✅ ${CAT_NAMES[cat]} — ${name} (${val}회) 추가됨`);
+        }
+
+        function toggleEditRanking(id, cat) {
+            const el = document.getElementById(`edit-${id}`);
+            el.classList.toggle('open');
+        }
+
+        function saveEditRanking(id, cat) {
+            const newName = document.getElementById(`edit-name-${id}`).value.trim();
+            const newVal = parseInt(document.getElementById(`edit-val-${id}`).value);
+            if (!newName || isNaN(newVal)) { showToast('⚠ 올바른 값을 입력하세요.'); return; }
+            const idx = RANKINGS[cat].findIndex(r => r.id === id);
+            if (idx > -1) { RANKINGS[cat][idx].name = newName; RANKINGS[cat][idx].val = newVal; }
+            saveData(); renderAll(); renderAdminRanking();
+            showToast('✅ 기록이 수정되었습니다.');
+        }
+
+        function deleteRanking(id, cat) {
+            if (!confirm('이 기록을 삭제하시겠습니까?')) return;
+            RANKINGS[cat] = RANKINGS[cat].filter(r => r.id !== id);
+            saveData(); renderAll(); renderAdminRanking();
+            showToast('🗑 기록이 삭제되었습니다.');
+        }
+
+        function deleteChamp(id) {
+            if (!confirm('이 챔피언 기록을 삭제하시겠습니까?')) return;
+            CHAMPIONS = CHAMPIONS.filter(c => c.id !== id);
+            saveData(); renderAll(); renderAdminChamps();
+            showToast('🗑 챔피언 기록이 삭제되었습니다.');
+        }
+
+        // ===== 주간 종료 확인 모달 =====
+        function openConfirmModal() {
+            let allEntries = [];
+            Object.keys(RANKINGS).forEach(cat => RANKINGS[cat].forEach(r => allEntries.push({ ...r, cat })));
+            allEntries.sort((a, b) => b.val - a.val);
+            const top = allEntries[0];
+            const body = document.getElementById('confirm-preview-body');
+            if (!top) {
+                body.innerHTML = `<div style="color:var(--muted);font-size:0.85rem;padding:6px 0;">등록된 기록이 없어 챔피언이 확정되지 않습니다.</div>`;
+            } else {
+                body.innerHTML = `
+                    <div class="confirm-preview-row">
+                        <span class="confirm-preview-cat">${CAT_NAMES[top.cat]}</span>
+                        <span class="confirm-preview-winner">${top.name}</span>
+                        <span class="confirm-preview-val">${top.val}${SITE_STATE.mission.unit || '회'}</span>
+                    </div>`;
+            }
+            document.getElementById('confirm-modal').classList.add('open');
+        }
+        function closeConfirmModal() { document.getElementById('confirm-modal').classList.remove('open'); }
+
+        function confirmChampion() {
+            closeConfirmModal();
+            const now = new Date().getTime();
+
+            // ① 히스토리 아카이브
+            MISSION_HISTORY.unshift({
+                id: uid(),
+                name: SITE_STATE.mission.name,
+                description: SITE_STATE.mission.description,
+                reward: SITE_STATE.mission.reward,
+                unit: SITE_STATE.mission.unit || '회',
+                startDate: SITE_STATE.mission.startDate,
+                endDate: SITE_STATE.mission.endDate,
+                closedAt: now,
+                finalRankings: JSON.parse(JSON.stringify(RANKINGS))
+            });
+
+            // ② 전체 1위 추출 → 배너 안내용
+            let allEntries = [];
+            Object.keys(RANKINGS).forEach(cat => RANKINGS[cat].forEach(r => allEntries.push({ ...r, cat })));
+            allEntries.sort((a, b) => b.val - a.val);
+            const topEntry = allEntries[0];
+            if (topEntry) {
+                SITE_STATE.champAnnouncement = {
+                    missionName: SITE_STATE.mission.name,
+                    champions: [{ cat: topEntry.cat, name: topEntry.name, val: topEntry.val }],
+                    announcedAt: now
+                };
+            }
+
+            // ③ 랭킹 초기화 + closed 플래그
+            RANKINGS = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
+            SITE_STATE.mission.closed = true;
+
+            saveData(); renderAll(); renderAdminRanking(); renderAdminChamps(); renderMissionHistory(); renderMissionLog();
+            showToast(topEntry ? `🏆 ${topEntry.name} 회원이 역대 챔피언으로 등록되었습니다.` : '기록이 없어 챔피언이 확정되지 않았습니다.');
+        }
+
+        // ===== 미션 기록 (히스토리) 렌더링 =====
+        function renderMissionHistory() {
+            // 드롭다운 (미션 등록 탭용 — 이름+설명만 불러옴)
+            const sel = document.getElementById('quick-load-select');
+            sel.innerHTML = '<option value="">— 미션 선택 —</option>' +
+                MISSION_HISTORY.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+        }
+
+        function quickLoadMission(id) {
+            if (!id) return;
+            const m = MISSION_HISTORY.find(h => h.id === id);
+            if (!m) return;
+            document.getElementById('adm-m-name').value = m.name;
+            document.getElementById('adm-m-desc').value = m.description || '';
+            // 선택 초기화
+            document.getElementById('quick-load-select').value = '';
+            showToast(`✅ "${m.name}" 이름·설명을 불러왔습니다.`);
+        }
+
+        // ===== 미션 기록 탭 렌더링 =====
+        // 각 미션 아이템별 현재 선택 카테고리 상태
+        const logCatState = {};
+
+        function renderMissionLog() {
+            const container = document.getElementById('mission-log-list');
+            if (MISSION_HISTORY.length === 0) {
+                container.innerHTML = `<div class="history-empty">종료된 미션이 없습니다.</div>`;
+                return;
+            }
+
+            const fmt = ts => {
+                if (!ts) return null;
+                const d = new Date(ts);
+                return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+            };
+
+            container.innerHTML = MISSION_HISTORY.map(m => {
+                const startStr = fmt(m.startDate);
+                const endStr   = fmt(m.endDate) || fmt(m.closedAt);
+                const dateRange = startStr ? `${startStr} ~ ${endStr}` : endStr;
+
+                const fr = m.finalRankings || {};
+                const hasAny = Object.values(fr).some(arr => arr && arr.length > 0);
+
+                // 기본 필터 상태 초기화
+                if (!logCatState[m.id]) logCatState[m.id] = 'all';
+
+                return `<div class="log-item" id="log-${m.id}">
+                    <div class="log-item-header" onclick="${hasAny ? `toggleLog('${m.id}')` : ''}">
+                        <div class="log-item-left">
+                            <span class="log-item-name">${m.name}</span>
+                            <div class="log-item-meta-row">
+                                <span class="log-meta-date">${dateRange}</span>
+                                ${m.reward ? `<span class="log-meta-sep">·</span><span class="log-meta-reward">${m.reward}</span>` : ''}
+                            </div>
+                        </div>
+                        ${hasAny ? `<svg class="log-toggle-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>` : ''}
+                    </div>
+                    ${hasAny ? `
+                    <div class="log-item-body" id="log-body-${m.id}">
+                        <div class="log-cat-filter">
+                            <button class="log-cat-btn active" onclick="setLogCat('${m.id}','all',this)">전체</button>
+                            <button class="log-cat-btn" onclick="setLogCat('${m.id}','adult-m',this)">성인부 남</button>
+                            <button class="log-cat-btn" onclick="setLogCat('${m.id}','adult-f',this)">성인부 여</button>
+                            <button class="log-cat-btn" onclick="setLogCat('${m.id}','student-m',this)">학생부 남</button>
+                            <button class="log-cat-btn" onclick="setLogCat('${m.id}','student-f',this)">학생부 여</button>
+                        </div>
+                        <div class="log-rank-list" id="log-ranks-${m.id}">
+                            ${buildLogRankRows(m, 'all')}
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function buildLogRankRows(m, cat) {
+            const fr = m.finalRankings || {};
+            const unit = m.unit || '회';
+            let html = '';
+
+            if (cat === 'all') {
+                let all = [];
+                Object.keys(CAT_NAMES).forEach(c => {
+                    (fr[c] || []).forEach(e => all.push({ ...e, cat: c }));
+                });
+                all.sort((a, b) => b.val - a.val);
+                if (all.length === 0) return `<div class="log-empty-cat">기록 없음</div>`;
+                all.forEach((e, i) => {
+                    const numClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+                    html += `<div class="log-rank-row">
+                        <span class="log-rank-num ${numClass}">${i+1}위</span>
+                        <span class="log-rank-name">${e.name}<span class="log-rank-cat">${CAT_NAMES[e.cat]}</span></span>
+                        <span class="log-rank-val">${e.val}<span class="log-rank-unit">${unit}</span></span>
+                    </div>`;
+                });
+            } else {
+                const entries = [...(fr[cat] || [])].sort((a, b) => b.val - a.val);
+                if (entries.length === 0) return `<div class="log-empty-cat">기록 없음</div>`;
+                entries.forEach((e, i) => {
+                    const numClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+                    html += `<div class="log-rank-row">
+                        <span class="log-rank-num ${numClass}">${i+1}위</span>
+                        <span class="log-rank-name">${e.name}</span>
+                        <span class="log-rank-val">${e.val}<span class="log-rank-unit">${unit}</span></span>
+                    </div>`;
+                });
+            }
+            return html;
+        }
+
+        function setLogCat(missionId, cat, btn) {
+            logCatState[missionId] = cat;
+            // 버튼 active 상태
+            const body = document.getElementById(`log-body-${missionId}`);
+            body.querySelectorAll('.log-cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // 랭킹 다시 렌더
+            const m = MISSION_HISTORY.find(h => h.id === missionId);
+            document.getElementById(`log-ranks-${missionId}`).innerHTML = buildLogRankRows(m, cat);
+        }
+
+        function toggleLog(id) {
+            const el = document.getElementById(`log-${id}`);
+            if (el) el.classList.toggle('open');
+        }
+
+        function loadMission(id) {
+            const m = MISSION_HISTORY.find(h => h.id === id);
+            if (!m) return;
+            document.getElementById('adm-m-name').value = m.name;
+            document.getElementById('adm-m-desc').value = m.description || '';
+            showToast(`✅ "${m.name}" 이름·설명을 불러왔습니다.`);
+        }
+
+        function deleteHistory(id) {
+            if (!confirm('이 히스토리를 삭제하시겠습니까?')) return;
+            MISSION_HISTORY = MISSION_HISTORY.filter(m => m.id !== id);
+            saveData(); renderMissionHistory(); renderMissionLog();
+            showToast('🗑 히스토리가 삭제되었습니다.');
+        }
+
+        // ===== 모달 =====
+        function openLogin() { document.getElementById('login-modal').classList.add('open'); document.getElementById('admin-pw').value = ''; setTimeout(() => document.getElementById('admin-pw').focus(), 100); }
+        function checkLogin() {
+            if (document.getElementById('admin-pw').value === 'tmt777') {
+                document.getElementById('login-modal').classList.remove('open');
+                openAdmin();
+            } else {
+                showToast('⚠ 비밀번호가 일치하지 않습니다.');
+            }
+        }
+        function openAdmin() {
+            renderMissionPanel();
+            renderAdminRanking();
+            renderAdminChamps();
+            renderMissionHistory();
+            renderMissionLog();
+            updateUnitLabel();
+            document.getElementById('admin-modal').classList.add('open');
+        }
+
+        // ===== 미션 등록 패널 분기 =====
+        function hasMission() {
+            return !!(SITE_STATE.mission.name && SITE_STATE.mission.name.trim());
+        }
+
+        function renderMissionPanel() {
+            if (hasMission()) {
+                // 카드 뷰 표시, 폼 숨김
+                showMissionViewMode();
+            } else {
+                // 빈 폼 표시
+                showMissionEditMode(false);
+            }
+        }
+
+        function showMissionViewMode() {
+            const pad = n => String(n).padStart(2,'0');
+            const fmt = ts => {
+                if (!ts) return null;
+                const d = new Date(ts);
+                return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
+            };
+            const m = SITE_STATE.mission;
+            document.getElementById('mv-name').textContent = m.name || '—';
+            document.getElementById('mv-desc').textContent = m.description || '—';
+            document.getElementById('mv-reward').textContent = m.reward ? `🏆 ${m.reward}` : '—';
+            document.getElementById('mv-unit').textContent = `단위: ${m.unit || '회'}`;
+            const start = fmt(m.startDate);
+            const end   = fmt(m.endDate);
+            document.getElementById('mv-date').textContent = start && end ? `${start} ~ ${end}` : end || '—';
+            document.getElementById('mission-view-mode').style.display = 'block';
+            document.getElementById('mission-edit-mode').style.display = 'none';
+        }
+
+        function showMissionEditMode(isEdit) {
+            // 폼 값 채우기
+            const m = SITE_STATE.mission;
+            const pad = n => String(n).padStart(2,'0');
+            document.getElementById('adm-m-name').value  = m.name || '';
+            document.getElementById('adm-m-desc').value  = m.description || '';
+            document.getElementById('adm-m-reward').value = m.reward || '';
+            document.getElementById('adm-m-status').value = m.status || 'active';
+            document.getElementById('adm-m-unit').value  = m.unit || '회';
+
+            // 날짜 초기화 후 채우기
+            document.getElementById('adm-m-startdate').value = '';
+            document.getElementById('adm-m-enddate').value = '';
+            document.getElementById('start-display').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
+            document.getElementById('end-display').innerHTML   = `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
+
+            if (m.startDate) {
+                const s = new Date(m.startDate);
+                const v = `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}`;
+                document.getElementById('adm-m-startdate').value = v;
+                updateDateDisplay('adm-m-startdate', 'start-display');
+            }
+            if (m.endDate) {
+                const e = new Date(m.endDate);
+                const v = `${e.getFullYear()}-${pad(e.getMonth()+1)}-${pad(e.getDate())}`;
+                document.getElementById('adm-m-enddate').value = v;
+                updateDateDisplay('adm-m-enddate', 'end-display');
+            }
+
+            // 수정 모드면 취소 버튼 표시, 라벨 변경
+            document.getElementById('edit-cancel-btn').style.display = isEdit ? '' : 'none';
+            document.getElementById('edit-mode-label').textContent = isEdit ? '미션 수정 중' : '새 미션 등록';
+
+            document.getElementById('mission-view-mode').style.display = 'none';
+            document.getElementById('mission-edit-mode').style.display = 'block';
+        }
+
+        function enterEditMode() { showMissionEditMode(true); }
+
+        function cancelEditMode() {
+            if (hasMission()) showMissionViewMode();
+        }
+        function closeAdmin() { document.getElementById('admin-modal').classList.remove('open'); }
+        function closeIfOverlay(e, id) { if (e.target.id === id) document.getElementById(id).classList.remove('open'); }
+
+        function switchPanel(panelId, btn) {
+            document.querySelectorAll('.adm-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.adm-nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // ===== 날짜 표시 업데이트 =====
+        function updateDateDisplay(inputId, displayId) {
+            const val = document.getElementById(inputId).value;
+            const display = document.getElementById(displayId);
+            if (!display) return;
+            if (val) {
+                const [y, m, d] = val.split('-');
+                display.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#666"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
+                display.querySelector('svg').style.fill = '#888';
+            } else {
+                display.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#444"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
+            }
+        }
+
+        // ===== 스크롤 옵저버 =====
+        const obs = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); }), { threshold: 0.1 });
+        // 초기화는 Firebase onValue 콜백에서 처리
+    </script>
+</body>
+</html>
