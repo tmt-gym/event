@@ -95,6 +95,7 @@
         .rank-card.rank-4, .rank-card.rank-5 { border: 1px solid rgba(160, 160, 160, 0.1); }
         .rank-icon { width: 32px; height: 32px; margin: 0 auto 15px; display: block; }
         .rank-1 .rank-icon, .rank-2 .rank-icon, .rank-3 .rank-icon { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3)); }
+        .rank-2 .rank-icon, .rank-3 .rank-icon { display: none; }
         .rank-4 .rank-icon, .rank-5 .rank-icon { fill: var(--iron); }
         .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.9rem; margin-bottom: 12px; letter-spacing: -0.5px; }
         .rank-1 .rank-num-display, .rank-2 .rank-num-display, .rank-3 .rank-num-display { color: var(--gold); }
@@ -129,12 +130,12 @@
             .rank-card-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px; }
             .rank-header-left { display: flex; align-items: center; gap: 8px; }
             .rank-icon { width: 24px; height: 24px; margin: 0; display: inline-block; }
-            .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 1.1rem; margin: 0; display: inline-block; }
-            .rank-cat { font-size: 0.92rem; font-weight: var(--weight-regular); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
+            .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 1.2rem; margin: 0; display: inline-block; }
+            .rank-cat { font-size: 1rem; font-weight: var(--weight-regular); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
             .rank-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px dashed #222; padding-top: 16px; }
-            .rank-name { font-family: var(--font-body); font-size: 1.4rem; font-weight: var(--weight-bold); color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+            .rank-name { font-family: var(--font-body); font-size: 1.55rem; font-weight: var(--weight-bold); color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
             .rank-val-box { border: none; padding: 0; margin: 0; margin-top: 0; }
-            .rank-val { font-family: var(--font-num); font-size: 2.2rem; line-height: 1; }
+            .rank-val { font-family: var(--font-num); font-size: 2.4rem; line-height: 1; }
             .rank-bg-num { display: none; }
 
             /* 시상대: 모바일에서도 3열 유지하되 카드 간소화 */
