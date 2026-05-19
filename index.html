@@ -655,6 +655,33 @@
             word-break: keep-all;
         }
 
+        /* 미션 종료 최종 랭킹 심플 리스트 */
+        .result-list { display: flex; flex-direction: column; gap: 0; border: 1px solid #1a1a1a; border-radius: 8px; overflow: hidden; }
+        .result-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 16px;
+            border-bottom: 1px solid #111;
+            background: #0a0a0a;
+            transition: background 0.15s;
+            position: relative;
+        }
+        .result-row:last-child { border-bottom: none; }
+        .result-row:hover { background: #0f0f0f; }
+        .result-row.first {
+            background: #0f0800;
+            border-left: 3px solid var(--gold);
+            padding-left: 13px;
+        }
+        .result-row.first .result-name { color: #fff; }
+        .result-row.first .result-val { color: var(--gold); }
+        .result-rank { width: 32px; font-size: 0.82rem; font-weight: 700; font-family: var(--font-body); flex-shrink: 0; }
+        .result-name { flex: 1; font-size: 0.92rem; font-weight: 600; color: #ddd; font-family: var(--font-body); display: flex; align-items: center; gap: 8px; }
+        .result-cat { font-size: 0.7rem; color: #555; font-weight: 400; }
+        .result-val { font-family: var(--font-num); font-size: 1.15rem; color: #aaa; flex-shrink: 0; }
+        .result-unit { font-size: 0.7rem; color: #666; margin-left: 2px; font-family: var(--font-body); }
+
         /* 자동 마감 안내 */
         .auto-close-notice {
             display: flex;
@@ -854,35 +881,38 @@
     </section>
 
     <!-- 미션 종료 결과 섹션 (closed 상태일 때만 표시) -->
-    <section id="mission-result-section" style="display:none; background:var(--surface); padding:50px 0;">
+    <section id="mission-result-section" style="display:none; background:var(--surface); padding:60px 0;">
         <div class="container reveal">
 
-            <!-- 끝난 미션 정보 (작게) -->
-            <div style="text-align:center; margin-bottom:28px; opacity:0.45;">
-                <span style="display:inline-block; background:#222; color:#666; font-size:0.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:4px 10px; border-radius:3px; margin-bottom:10px;">미션 종료</span>
-                <div id="result-mission-name" style="font-family:'Pretendard',sans-serif; font-size:1rem; font-weight:700; color:#666; margin-bottom:4px;"></div>
-                <div id="result-mission-desc" style="font-family:'Pretendard',sans-serif; font-size:0.8rem; color:#444;"></div>
-            </div>
-
-            <!-- 다음 미션 안내 (크게, 눈에 띄게) -->
-            <div style="text-align:center; margin-bottom:40px; padding: 24px 20px; border: 1px solid #1e1e1e; border-radius:10px; background:#0d0d0d;">
-                <div style="font-size:1.6rem; margin-bottom:10px;">🥊</div>
-                <div style="font-family:'Pretendard',sans-serif; font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:6px;">다음 미션을 기다려주세요!</div>
-                <div style="font-family:'Pretendard',sans-serif; font-size:0.82rem; color:#555;">새로운 도전이 곧 시작됩니다</div>
-            </div>
-
-            <!-- 최종 랭킹 카테고리 탭 -->
-            <div style="margin-bottom:10px;">
-                <div style="font-family:'Pretendard',sans-serif; font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">최종 랭킹</div>
-                <div class="filter-tabs" id="result-cat-tabs">
-                    <button class="filter-tab active" onclick="setResultCat('all', this)">전체</button>
-                    <button class="filter-tab" onclick="setResultCat('adult-m', this)">성인부 남</button>
-                    <button class="filter-tab" onclick="setResultCat('adult-f', this)">성인부 여</button>
-                    <button class="filter-tab" onclick="setResultCat('student-m', this)">학생부 남</button>
-                    <button class="filter-tab" onclick="setResultCat('student-f', this)">학생부 여</button>
+            <!-- 종료된 미션 정보 -->
+            <div style="text-align:center; margin-bottom:36px;">
+                <span class="mission-badge" style="background:#1a1a1a; color:#666; border:1px solid #2a2a2a;">미션 종료</span>
+                <h2 class="mission-title" id="result-mission-name" style="margin-top:14px; color:#aaa;"></h2>
+                <p class="mission-desc" id="result-mission-desc" style="color:#555;"></p>
+                <div style="display:inline-flex; align-items:center; gap:8px; margin-top:12px; background:#0d0d0d; border:1px solid #1e1e1e; border-radius:6px; padding:10px 18px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    <span style="font-family:'Pretendard',sans-serif; font-size:0.85rem; color:#666; font-weight:600;" id="result-mission-reward"></span>
                 </div>
             </div>
-            <div id="result-ranking-container" class="ranking-grid"></div>
+
+            <!-- 다음 미션 안내 -->
+            <div style="text-align:center; margin-bottom:36px; padding:20px; border:1px solid #1e1e1e; border-radius:8px; background:#0a0a0a;">
+                <div style="font-family:'Pretendard',sans-serif; font-size:1rem; font-weight:700; color:#fff; margin-bottom:4px;">🥊 다음 미션을 기다려주세요!</div>
+                <div style="font-family:'Pretendard',sans-serif; font-size:0.8rem; color:#444;">새로운 도전이 곧 시작됩니다</div>
+            </div>
+
+            <!-- 최종 랭킹 -->
+            <div class="section-header" style="margin-bottom:16px;">
+                <h2 class="section-title" style="font-size:1.2rem;">최종 랭킹</h2>
+            </div>
+            <div class="filter-tabs" id="result-cat-tabs" style="margin-bottom:20px;">
+                <button class="filter-tab active" onclick="setResultCat('all', this)">전체</button>
+                <button class="filter-tab" onclick="setResultCat('adult-m', this)">성인부 남</button>
+                <button class="filter-tab" onclick="setResultCat('adult-f', this)">성인부 여</button>
+                <button class="filter-tab" onclick="setResultCat('student-m', this)">학생부 남</button>
+                <button class="filter-tab" onclick="setResultCat('student-f', this)">학생부 여</button>
+            </div>
+            <div id="result-ranking-container"></div>
         </div>
     </section>
 
@@ -1269,6 +1299,7 @@
                 // 종료된 미션 정보 + 최신 히스토리 기록 표시
                 document.getElementById('result-mission-name').innerText = SITE_STATE.mission.name;
                 document.getElementById('result-mission-desc').innerText = SITE_STATE.mission.description || '';
+                document.getElementById('result-mission-reward').innerText = SITE_STATE.mission.reward ? `1위 보상 : ${SITE_STATE.mission.reward}` : '';
                 renderResultRanking();
                 return;
             }
@@ -1306,7 +1337,6 @@
             const unit = latest.unit || '회';
             const fr   = latest.finalRankings;
 
-            // 카테고리 필터 적용
             let all = [];
             if (resultCatFilter === 'all') {
                 Object.keys(CAT_NAMES).forEach(cat => (fr[cat] || []).forEach(e => all.push({ ...e, cat })));
@@ -1320,23 +1350,18 @@
                 return;
             }
 
-            const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
             let rank = 0, lastVal = -1, skip = 1;
-            container.innerHTML = all.map((item, idx) => {
+            container.innerHTML = `<div class="result-list">` + all.map(item => {
                 if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
                 lastVal = item.val;
-                return `<div class="rank-card rank-${Math.min(rank,5)} reveal">
-                    <div class="rank-card-header">
-                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${rank}순위</div></div>
-                        <div class="rank-cat">${CAT_NAMES[item.cat] || ''}</div>
-                    </div>
-                    <div class="rank-card-body">
-                        <div class="rank-name">${item.name}</div>
-                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">${unit}</span></div></div>
-                    </div>
+                const medalColor = rank === 1 ? 'var(--gold)' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : '#444';
+                const firstClass = rank === 1 ? ' first' : '';
+                return `<div class="result-row${firstClass}">
+                    <span class="result-rank" style="color:${medalColor};">${rank}위</span>
+                    <span class="result-name">${item.name}${resultCatFilter === 'all' ? `<span class="result-cat">${CAT_NAMES[item.cat]}</span>` : ''}</span>
+                    <span class="result-val">${item.val}<span class="result-unit">${unit}</span></span>
                 </div>`;
-            }).join('');
-            document.querySelectorAll('#result-ranking-container .reveal').forEach(el => obs.observe(el));
+            }).join('') + `</div>`; 
         }
 
         function updateTimer() {
