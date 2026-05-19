@@ -78,6 +78,10 @@
         .tab-btn.active { background: var(--red); color: white; border-color: var(--red); transform: scale(1.05); box-shadow: 0 5px 15px rgba(204, 0, 0, 0.3); }
 
         .ranking-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; width: 100%; align-items: stretch; }
+
+        /* 시상대 3열 그리드 */
+        .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; align-items: flex-end; margin-bottom: 12px; }
+        .podium-grid .rank-card.rank-1 { transform: scale(1.04); transform-origin: bottom center; }
         .rank-card-header { display: block; }
         .rank-header-left { display: block; }
         .rank-card-body { display: block; }
@@ -1454,14 +1458,14 @@
                 </div>` : `<div style="visibility:hidden;" class="rank-card"></div>`;
 
             // 시상대: 2위 / 1위 / 3위
-            const podium = `<div class="ranking-grid" style="align-items:flex-end;">
+            const podium = `<div class="podium-grid">
                 ${rankCard(second)}
                 ${rankCard(first)}
                 ${rankCard(third)}
             </div>`;
 
             // 4위~
-            const list = rest.length > 0 ? `<div class="ranking-grid" style="margin-top:12px;">` +
+            const list = rest.length > 0 ? `<div class="ranking-grid" style="margin-top:0;">` +
                 rest.map(item => `
                 <div class="rank-card rank-${Math.min(item.rank,5)} reveal">
                     <div class="rank-card-header">
