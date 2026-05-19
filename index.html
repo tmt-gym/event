@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>토마토복싱 미션 챌린지</title>
+    <title>토마토복싱 챌린지 기록실</title>
 
     <!-- Firebase SDK — head에서 먼저 로드 -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1101,6 +1101,8 @@
         // ===== 데이터 =====
         const CAT_NAMES = { 'adult-m': '성인부 남', 'adult-f': '성인부 여', 'student-m': '학생부 남', 'student-f': '학생부 여' };
 
+        function uid() { return Math.random().toString(36).slice(2,9); }
+
         const defaultMission = { 
             name: '샌드백 1분 타격', 
             description: '1분 동안 가장 많은 유효 타격수가 나오도록 기록하세요.',
@@ -1119,8 +1121,6 @@
             { id: uid(), mission: '버피 테스트 1분', name: '이하나', val: 45 },
             { id: uid(), mission: '미트 치기 유효타', name: '박태준', val: 198 }
         ];
-
-        function uid() { return Math.random().toString(36).slice(2,9); }
 
         // ===== Firebase 설정 =====
         const FIREBASE_CONFIG = {
