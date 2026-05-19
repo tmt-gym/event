@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>토마토복싱 미션 챌린지</title>
+    <title>토마토복싱 챌린지 기록실</title>
 
     <!-- Firebase SDK — head에서 먼저 로드 -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -725,36 +725,41 @@
         .pd-item.first  .pd-rank { color: #7a6a00; }
         .pd-item.second .pd-rank { color: #666; }
         .pd-item.third  .pd-rank { color: #6a4a20; }
-        .pd-cat { font-size: 0.6rem; color: #444; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 3px; line-height: 1.3; }
-        .pd-item.first  .pd-cat { color: #7a6a00; }
-        .pd-item.second .pd-cat { color: #666; }
-        .pd-item.third  .pd-cat { color: #6a4a20; }
-        .pd-name { font-size: 0.85rem; font-weight: 700; color: #bbb; margin-bottom: 8px; word-break: keep-all; line-height: 1.2; }
-        .pd-item.first  .pd-name { color: #fff; font-size: 0.95rem; }
-        .pd-item.second .pd-name,
-        .pd-item.third  .pd-name { color: #ccc; }
-        .pd-score { font-family: var(--font-num); font-size: 1.2rem; color: #555; line-height: 1; }
-        .pd-item.first  .pd-score { color: var(--gold); font-size: 1.5rem; }
-        .pd-item.second .pd-score { color: #888; }
-        .pd-item.third  .pd-score { color: #7a5a30; }
-        .pd-unit { font-size: 0.6rem; font-family: var(--font-body); opacity: 0.6; margin-left: 1px; }
 
-        /* 4위~ 리스트 */
-        .pd-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+        /* 카테고리 — rt-first-cat / rt-cat 동일하게 */
+        .pd-cat { font-size: 0.7rem; color: #555; font-weight: var(--weight-regular); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; line-height: 1.3; }
+        .pd-item.first  .pd-cat { color: #7a6a00; }
+        .pd-item.second .pd-cat { color: #555; }
+        .pd-item.third  .pd-cat { color: #555; }
+
+        /* 이름 — rt-first-name / rt-name 동일하게 */
+        .pd-name { font-size: 0.9rem; font-weight: var(--weight-semibold); color: #ccc; margin-bottom: 8px; word-break: keep-all; line-height: 1.2; font-family: var(--font-body); }
+        .pd-item.first .pd-name { font-size: 1.15rem; font-weight: var(--weight-bold); color: #fff; }
+
+        /* 기록 — rt-first-val / rt-val 동일하게 */
+        .pd-score { font-family: var(--font-num); font-size: 1.15rem; color: #888; line-height: 1; }
+        .pd-item.first  .pd-score { color: var(--gold); font-size: 1.9rem; }
+        .pd-unit { font-size: 0.72rem; font-family: var(--font-body); color: #7a6a00; opacity: 0.8; margin-left: 1px; }
+        .pd-item.second .pd-score,
+        .pd-item.third  .pd-score { color: #888; }
+
+        /* 4위~ 리스트 — rt-row 동일하게 */
+        .pd-list { display: flex; flex-direction: column; gap: 0; margin-top: 8px; border: 1px solid #161616; border-radius: 8px; overflow: hidden; }
         .pd-row {
             display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; border-radius: 8px;
-            border: 1px solid #161616; background: #0a0a0a;
+            padding: 13px 16px;
+            border-bottom: 1px solid #0f0f0f; background: #0a0a0a;
         }
-        .pd-row-num { font-family: var(--font-num); font-size: 1.1rem; color: #2a2a2a; width: 24px; flex-shrink: 0; text-align: center; }
-        .pd-row-info { flex: 1; min-width: 0; }
-        .pd-row-cat { display: block; font-size: 0.63rem; color: #444; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
-        .pd-row-name { font-size: 0.88rem; font-weight: 700; color: #888; }
-        .pd-row-score { font-family: var(--font-num); font-size: 1.1rem; color: #3a3a3a; flex-shrink: 0; }
-        .pd-row-unit { font-size: 0.62rem; font-family: var(--font-body); opacity: 0.6; margin-left: 1px; }
+        .pd-row:last-child { border-bottom: none; }
+        .pd-row-num { font-family: var(--font-num); font-size: 1.2rem; color: #2a2a2a; width: 28px; flex-shrink: 0; text-align: center; }
+        .pd-row-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+        .pd-row-cat { font-size: 0.68rem; color: #555; font-weight: var(--weight-regular); flex-shrink: 0; }
+        .pd-row-name { font-size: 0.9rem; font-weight: var(--weight-semibold); color: #ccc; font-family: var(--font-body); }
+        .pd-row-score { font-family: var(--font-num); font-size: 1.15rem; color: #888; flex-shrink: 0; }
+        .pd-row-unit { font-size: 0.68rem; font-family: var(--font-body); color: #555; margin-left: 1px; }
 
         /* 미션 종료 최종 랭킹 심플 리스트 */
-        .result-list { display: none; } /* 구버전 숨김 */
+        .result-list { display: none; }
 
         /* 자동 마감 안내 */
         .auto-close-notice {
@@ -1455,8 +1460,8 @@
                 <div class="pd-row">
                     <span class="pd-row-num">${item.rank}</span>
                     <div class="pd-row-info">
-                        <span class="pd-row-cat">${CAT_NAMES[item.cat] || ''}</span>
                         <span class="pd-row-name">${item.name}</span>
+                        <span class="pd-row-cat">${CAT_NAMES[item.cat] || ''}</span>
                     </div>
                     <span class="pd-row-score">${item.val}<span class="pd-row-unit">${unit}</span></span>
                 </div>`).join('') + `</div>` : '';
