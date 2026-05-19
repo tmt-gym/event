@@ -655,6 +655,52 @@
             word-break: keep-all;
         }
 
+        /* ===== 실시간 랭킹 새 디자인 ===== */
+        #ranking-container { display: flex; flex-direction: column; gap: 8px; }
+
+        /* 1위 카드 */
+        .rt-first {
+            background: #100d00;
+            border: 1px solid #3a3000;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .rt-first-num {
+            font-family: var(--font-num);
+            font-size: 2.6rem;
+            color: var(--gold);
+            line-height: 1;
+            flex-shrink: 0;
+            width: 44px;
+            text-align: center;
+        }
+        .rt-first-info { flex: 1; min-width: 0; }
+        .rt-first-cat { font-size: 0.7rem; color: #7a6a00; font-weight: var(--weight-regular); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .rt-first-name { font-size: 1.15rem; font-weight: var(--weight-bold); color: #fff; }
+        .rt-first-right { flex-shrink: 0; text-align: right; }
+        .rt-first-val { font-family: var(--font-num); font-size: 1.9rem; color: var(--gold); line-height: 1; }
+        .rt-first-unit { font-size: 0.72rem; color: #7a6a00; margin-left: 2px; font-family: var(--font-body); }
+
+        /* 2위~ 리스트 */
+        .rt-list { border: 1px solid #161616; border-radius: 8px; overflow: hidden; }
+        .rt-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 16px;
+            border-bottom: 1px solid #0f0f0f;
+            background: #0a0a0a;
+        }
+        .rt-row:last-child { border-bottom: none; }
+        .rt-num { font-family: var(--font-num); font-size: 1.2rem; width: 28px; flex-shrink: 0; text-align: center; }
+        .rt-name { flex: 1; font-size: 0.9rem; font-weight: var(--weight-semibold); color: #ccc; display: flex; align-items: center; gap: 8px; font-family: var(--font-body); }
+        .rt-cat { font-size: 0.68rem; color: #555; font-weight: var(--weight-regular); }
+        .rt-val { font-family: var(--font-num); font-size: 1.15rem; color: #888; flex-shrink: 0; }
+        .rt-unit { font-size: 0.65rem; color: #555; margin-left: 1px; font-family: var(--font-body); }
+
         /* 미션 종료 최종 랭킹 심플 리스트 */
         .result-list { display: flex; flex-direction: column; gap: 0; border: 1px solid #1a1a1a; border-radius: 8px; overflow: hidden; }
         .result-row {
@@ -895,12 +941,6 @@
                 </div>
             </div>
 
-            <!-- 다음 미션 안내 -->
-            <div style="text-align:center; margin-bottom:36px; padding:20px; border:1px solid #1e1e1e; border-radius:8px; background:#0a0a0a;">
-                <div style="font-family:'Pretendard',sans-serif; font-size:1rem; font-weight:700; color:#fff; margin-bottom:4px;">🥊 다음 미션을 기다려주세요!</div>
-                <div style="font-family:'Pretendard',sans-serif; font-size:0.8rem; color:#444;">새로운 도전이 곧 시작됩니다</div>
-            </div>
-
             <!-- 최종 랭킹 -->
             <div class="section-header" style="margin-bottom:16px;">
                 <h2 class="section-title" style="font-size:1.2rem;">최종 랭킹</h2>
@@ -913,6 +953,12 @@
                 <button class="filter-tab" onclick="setResultCat('student-f', this)">학생부 여</button>
             </div>
             <div id="result-ranking-container"></div>
+
+            <!-- 다음 미션 안내 — 랭킹 확인 후 자연스럽게 -->
+            <div style="text-align:center; margin-top:36px; padding:20px; border:1px solid #1e1e1e; border-radius:8px; background:#0a0a0a;">
+                <div style="font-family:'Pretendard',sans-serif; font-size:1rem; font-weight:700; color:#fff; margin-bottom:4px;">🥊 다음 미션을 기다려주세요!</div>
+                <div style="font-family:'Pretendard',sans-serif; font-size:0.8rem; color:#444;">새로운 도전이 곧 시작됩니다</div>
+            </div>
         </div>
     </section>
 
@@ -1350,18 +1396,23 @@
                 return;
             }
 
+            const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
             let rank = 0, lastVal = -1, skip = 1;
-            container.innerHTML = `<div class="result-list">` + all.map(item => {
+            container.innerHTML = `<div class="ranking-grid">` + all.map(item => {
                 if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
                 lastVal = item.val;
-                const medalColor = rank === 1 ? 'var(--gold)' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : '#444';
-                const firstClass = rank === 1 ? ' first' : '';
-                return `<div class="result-row${firstClass}">
-                    <span class="result-rank" style="color:${medalColor};">${rank}위</span>
-                    <span class="result-name">${item.name}${resultCatFilter === 'all' ? `<span class="result-cat">${CAT_NAMES[item.cat]}</span>` : ''}</span>
-                    <span class="result-val">${item.val}<span class="result-unit">${unit}</span></span>
+                return `<div class="rank-card rank-${Math.min(rank,5)} reveal">
+                    <div class="rank-card-header">
+                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${rank}순위</div></div>
+                        <div class="rank-cat">${CAT_NAMES[item.cat] || ''}</div>
+                    </div>
+                    <div class="rank-card-body">
+                        <div class="rank-name">${item.name}</div>
+                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">${unit}</span></div></div>
+                    </div>
                 </div>`;
-            }).join('') + `</div>`; 
+            }).join('') + `</div>`;
+            document.querySelectorAll('#result-ranking-container .reveal').forEach(el => obs.observe(el));
         }
 
         function updateTimer() {
@@ -1430,6 +1481,7 @@
 
         function renderRankings() {
             const container = document.getElementById('ranking-container');
+            const unit = SITE_STATE.mission.unit || '회';
             let combined = [];
             if (currentRankFilter === 'all') {
                 Object.keys(RANKINGS).forEach(cat => RANKINGS[cat].forEach(item => combined.push({...item, catLabel: CAT_NAMES[cat]})));
@@ -1439,22 +1491,42 @@
             combined.sort((a,b) => b.val - a.val);
             const data = combined.slice(0, 5);
             if (data.length === 0) { container.innerHTML = `<div class="empty-state"><p class="empty-text">아직 도전 기록이 없습니다.</p></div>`; return; }
+
             let rank = 0, lastVal = -1, skip = 1;
-            const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
-            container.innerHTML = data.map((item, idx) => {
+            const rows = data.map(item => {
                 if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
                 lastVal = item.val;
-                return `<div class="rank-card rank-${rank} reveal">
-                    <div class="rank-card-header">
-                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${rank}순위</div></div>
-                        <div class="rank-cat">${item.catLabel}</div>
+                return { ...item, rank };
+            });
+
+            const first = rows[0];
+            const rest  = rows.slice(1);
+
+            const firstCard = `
+                <div class="rt-first reveal">
+                    <div class="rt-first-num">1</div>
+                    <div class="rt-first-info">
+                        <div class="rt-first-cat">${first.catLabel}</div>
+                        <div class="rt-first-name">${first.name}</div>
                     </div>
-                    <div class="rank-card-body">
-                        <div class="rank-name">${item.name}</div>
-                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">회</span></div></div>
+                    <div class="rt-first-right">
+                        <span class="rt-first-val">${first.val}</span><span class="rt-first-unit">${unit}</span>
                     </div>
                 </div>`;
-            }).join('');
+
+            const listRows = rest.length > 0 ? `
+                <div class="rt-list reveal">
+                    ${rest.map(item => {
+                        const medalColor = item.rank === 2 ? '#C0C0C0' : item.rank === 3 ? '#CD7F32' : '#3a3a3a';
+                        return `<div class="rt-row">
+                            <span class="rt-num" style="color:${medalColor};">${item.rank}</span>
+                            <span class="rt-name">${item.name}<span class="rt-cat">${item.catLabel}</span></span>
+                            <span class="rt-val">${item.val}<span class="rt-unit">${unit}</span></span>
+                        </div>`;
+                    }).join('')}
+                </div>` : '';
+
+            container.innerHTML = firstCard + listRows;
             document.querySelectorAll('#ranking-container .reveal').forEach(el => obs.observe(el));
         }
 
