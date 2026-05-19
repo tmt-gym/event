@@ -110,7 +110,7 @@
         .champion-card { background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%); border: 1px solid #222; border-radius: 12px; padding: 20px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.4); min-height: 100px; transition: border-color 0.3s ease; }
         .champion-card::before { content: ''; position: absolute; left: 0; top: 15%; bottom: 15%; width: 3px; background: var(--red); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--red); }
         .champion-card:hover { border-color: #444; }
-        .champ-mission { font-size: 0.75rem; color: var(--red); font-weight: var(--weight-bold); letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
+        .champ-mission { font-size: 0.88rem; color: var(--red); font-weight: var(--weight-bold); letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
         .champ-name { font-family: var(--font-body); font-weight: var(--weight-bold); font-size: 1.35rem; color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .champ-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: auto; }
         .champ-val-box { display: flex; align-items: flex-end; }
@@ -1450,54 +1450,23 @@
             }
 
             let rank = 0, lastVal = -1, skip = 1;
-            const ranked = all.map(item => {
-                if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
-                lastVal = item.val;
-                return { ...item, rank };
-            });
-
-            const top3  = ranked.filter(r => r.rank <= 3);
-            const rest  = ranked.filter(r => r.rank > 3);
-            const first  = top3.find(r => r.rank === 1);
-            const second = top3.find(r => r.rank === 2);
-            const third  = top3.find(r => r.rank === 3);
-
             const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
 
-            const rankCard = (item) => item ? `
-                <div class="rank-card rank-${item.rank} reveal">
+            container.innerHTML = `<div class="ranking-grid">` + all.map(item => {
+                if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
+                lastVal = item.val;
+                const cardClass = rank === 1 ? 'rank-1' : rank <= 3 ? `rank-${rank}` : 'rank-4';
+                return `<div class="rank-card ${cardClass} reveal">
                     <div class="rank-card-header">
-                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${item.rank}순위</div></div>
+                        <div class="rank-header-left">${rank === 1 ? crownSvg : ''}<div class="rank-num-display">${rank}순위</div></div>
                         <div class="rank-cat">${CAT_NAMES[item.cat] || ''}</div>
                     </div>
                     <div class="rank-card-body">
                         <div class="rank-name">${item.name}</div>
                         <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">${unit}</span></div></div>
                     </div>
-                </div>` : `<div style="visibility:hidden;" class="rank-card"></div>`;
-
-            // 시상대: 2위 / 1위 / 3위
-            const podium = `<div class="podium-grid">
-                ${rankCard(second)}
-                ${rankCard(first)}
-                ${rankCard(third)}
-            </div>`;
-
-            // 4위~
-            const list = rest.length > 0 ? `<div class="ranking-grid" style="margin-top:0;">` +
-                rest.map(item => `
-                <div class="rank-card rank-${Math.min(item.rank,5)} reveal">
-                    <div class="rank-card-header">
-                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${item.rank}순위</div></div>
-                        <div class="rank-cat">${CAT_NAMES[item.cat] || ''}</div>
-                    </div>
-                    <div class="rank-card-body">
-                        <div class="rank-name">${item.name}</div>
-                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">${unit}</span></div></div>
-                    </div>
-                </div>`).join('') + `</div>` : '';
-
-            container.innerHTML = podium + list;
+                </div>`;
+            }).join('') + `</div>`;
             document.querySelectorAll('#result-ranking-container .reveal').forEach(el => obs.observe(el));
         }
 
