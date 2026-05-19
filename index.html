@@ -137,34 +137,28 @@
 
         /* ===== 관리자 버튼 (하단 고정) ===== */
         .admin-fab {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            z-index: 200;
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
+            justify-content: center;
+            padding: 24px 0 32px;
         }
         .admin-fab-btn {
-            background: var(--red);
-            color: #fff;
-            border: none;
+            background: none;
+            color: #333;
+            border: 1px solid #222;
             border-radius: 50px;
-            padding: 14px 22px;
+            padding: 10px 20px;
             font-family: var(--font-body);
             font-weight: var(--weight-bold);
-            font-size: 0.9rem;
+            font-size: 0.78rem;
             cursor: pointer;
             letter-spacing: 1px;
-            box-shadow: 0 6px 24px rgba(204,0,0,0.45);
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            gap: 6px;
+            transition: color 0.2s, border-color 0.2s;
         }
-        .admin-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(204,0,0,0.55); }
-        .admin-fab-btn svg { width: 18px; height: 18px; fill: #fff; }
+        .admin-fab-btn:hover { color: #666; border-color: #444; }
+        .admin-fab-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
         /* ===== 모달 공통 ===== */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
@@ -859,7 +853,7 @@
 
     <footer><p>© 2025 TOMATO BOXING GYM. ALL RIGHTS RESERVED.</p></footer>
 
-    <!-- 관리자 FAB -->
+    <!-- 관리자 버튼 — 페이지 맨 하단 -->
     <div class="admin-fab">
         <button class="admin-fab-btn" onclick="openLogin()">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
