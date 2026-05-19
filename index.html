@@ -81,9 +81,10 @@
 
         /* 시상대 3열 그리드 */
         .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; align-items: flex-end; margin-bottom: 12px; }
-        .podium-grid .rank-card.rank-1 { transform: scale(1.04); transform-origin: bottom center; padding-top: 40px; }
-        .podium-grid .rank-card.rank-2 { padding-top: 24px; }
-        .podium-grid .rank-card.rank-3 { padding-top: 12px; }
+        .podium-grid .rank-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .podium-grid .rank-card.rank-1 { transform: scale(1.04); transform-origin: bottom center; padding-top: 40px; padding-bottom: 40px; }
+        .podium-grid .rank-card.rank-2 { padding-top: 24px; padding-bottom: 24px; }
+        .podium-grid .rank-card.rank-3 { padding-top: 24px; padding-bottom: 24px; }
         .rank-card-header { display: block; }
         .rank-header-left { display: block; }
         .rank-card-body { display: block; }
@@ -128,28 +129,28 @@
             .rank-card-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px; }
             .rank-header-left { display: flex; align-items: center; gap: 8px; }
             .rank-icon { width: 24px; height: 24px; margin: 0; display: inline-block; }
-            .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.95rem; margin: 0; display: inline-block; }
-            .rank-cat { font-size: 0.78rem; font-weight: var(--weight-regular); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
+            .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 1.05rem; margin: 0; display: inline-block; }
+            .rank-cat { font-size: 0.88rem; font-weight: var(--weight-regular); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
             .rank-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px dashed #222; padding-top: 16px; }
-            .rank-name { font-family: var(--font-body); font-size: 1.15rem; font-weight: var(--weight-bold); color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+            .rank-name { font-family: var(--font-body); font-size: 1.3rem; font-weight: var(--weight-bold); color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
             .rank-val-box { border: none; padding: 0; margin: 0; margin-top: 0; }
-            .rank-val { font-family: var(--font-num); font-size: 1.7rem; line-height: 1; }
+            .rank-val { font-family: var(--font-num); font-size: 2rem; line-height: 1; }
             .rank-bg-num { display: none; }
 
             /* 시상대: 모바일에서도 3열 유지하되 카드 간소화 */
             .podium-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-            .podium-grid .rank-card { padding: 12px 6px; min-height: auto; text-align: center; align-items: center; }
+            .podium-grid .rank-card { padding: 20px 6px; min-height: auto; text-align: center; align-items: center; justify-content: center; display: flex; flex-direction: column; }
             .podium-grid .rank-card-header { flex-direction: column; align-items: center; gap: 4px; margin-bottom: 8px; }
             .podium-grid .rank-header-left { flex-direction: column; gap: 2px; }
-            .podium-grid .rank-cat { text-align: center; font-size: 0.62rem; }
-            .podium-grid .rank-num-display { font-size: 0.75rem; }
+            .podium-grid .rank-cat { text-align: center; font-size: 0.72rem; }
+            .podium-grid .rank-num-display { font-size: 0.85rem; }
             .podium-grid .rank-icon { width: 18px; height: 18px; }
             .podium-grid .rank-card-body { flex-direction: column; align-items: center; border-top: 1px dashed #222; padding-top: 8px; gap: 2px; }
-            .podium-grid .rank-name { font-size: 0.82rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-            .podium-grid .rank-val { font-size: 1.2rem; }
-            .podium-grid .rank-card.rank-1 { transform: scale(1.02); padding-top: 28px; }
-            .podium-grid .rank-card.rank-2 { padding-top: 16px; }
-            .podium-grid .rank-card.rank-3 { padding-top: 8px; }
+            .podium-grid .rank-name { font-size: 0.95rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+            .podium-grid .rank-val { font-size: 1.4rem; }
+            .podium-grid .rank-card.rank-1 { transform: scale(1.02); padding: 28px 6px; }
+            .podium-grid .rank-card.rank-2 { padding: 20px 6px; }
+            .podium-grid .rank-card.rank-3 { padding: 20px 6px; }
         }
         @media (max-width: 400px) { .rank-card { padding: 20px 16px; } .podium-grid .rank-card { padding: 10px 4px; } }
 
