@@ -1103,24 +1103,10 @@
 
         function uid() { return Math.random().toString(36).slice(2,9); }
 
-        const defaultMission = { 
-            name: '샌드백 1분 타격', 
-            description: '1분 동안 가장 많은 유효 타격수가 나오도록 기록하세요.',
-            reward: '정품 노바 복싱 글러브', 
-            endDate: new Date().getTime() + (5 * 24 * 60 * 60 * 1000),
-            status: 'active'
-        };
-        const defaultRankings = {
-            'adult-m': [{id: uid(), name: '김철수', val: 184}, {id: uid(), name: '이정진', val: 172}],
-            'adult-f': [{id: uid(), name: '박영희', val: 158}],
-            'student-m': [{id: uid(), name: '최민호', val: 165}, {id: uid(), name: '강성훈', val: 142}],
-            'student-f': [{id: uid(), name: '정지은', val: 135}]
-        };
-        const defaultChamps = [
-            { id: uid(), mission: '스피드 볼 타격', name: '홍길동', val: 210 },
-            { id: uid(), mission: '버피 테스트 1분', name: '이하나', val: 45 },
-            { id: uid(), mission: '미트 치기 유효타', name: '박태준', val: 198 }
-        ];
+        let SITE_STATE      = { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
+        let RANKINGS        = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
+        let MISSION_HISTORY = [];
+        let CHAMPIONS       = [];
 
         // ===== Firebase 설정 =====
         const FIREBASE_CONFIG = {
@@ -1156,11 +1142,11 @@
         ROOT.on('value', snapshot => {
             const data = snapshot.val();
             if (data) {
-                SITE_STATE      = data.state   || { mission: defaultMission };
-                RANKINGS        = data.rankings || defaultRankings;
+                SITE_STATE      = data.state    || { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
+                RANKINGS        = data.rankings || { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
                 MISSION_HISTORY = data.history  || [];
             } else {
-                // 최초 접속 — 완전히 빈 상태로 시작
+                // 최초 접속 — 빈 상태로 시작
                 SITE_STATE      = { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
                 RANKINGS        = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
                 MISSION_HISTORY = [];
@@ -1172,70 +1158,9 @@
                 renderAll();
                 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
             } else {
-                // 다른 기기(관리자)가 저장했을 때 실시간 반영
                 renderAll();
             }
         });
-
-        const defaultHistory = [
-            {
-                id: uid(), name: '스피드볼 30초 최다타격', description: '30초 동안 스피드볼을 최대한 많이 타격하세요.',
-                reward: '프로틴 쉐이커 세트',
-                startDate: new Date('2025-05-05').getTime(),
-                endDate: new Date('2025-05-11').getTime(),
-                closedAt: new Date('2025-05-11').getTime(),
-                champions: [
-                    { cat: 'adult-m', name: '홍길동', val: 210 },
-                    { cat: 'adult-f', name: '이수진', val: 188 },
-                    { cat: 'student-m', name: '김민준', val: 195 },
-                    { cat: 'student-f', name: '박지아', val: 172 }
-                ],
-                finalRankings: {
-                    'adult-m': [{id:uid(),name:'홍길동',val:210},{id:uid(),name:'최준호',val:198},{id:uid(),name:'강태욱',val:185}],
-                    'adult-f': [{id:uid(),name:'이수진',val:188},{id:uid(),name:'강예은',val:175},{id:uid(),name:'윤채린',val:160}],
-                    'student-m': [{id:uid(),name:'김민준',val:195},{id:uid(),name:'오태양',val:181}],
-                    'student-f': [{id:uid(),name:'박지아',val:172},{id:uid(),name:'송하은',val:155}]
-                }
-            },
-            {
-                id: uid(), name: '버피 테스트 1분', description: '1분 동안 버피 동작을 최대한 많이 반복하세요.',
-                reward: '정품 레이어스 글러브',
-                startDate: new Date('2025-04-28').getTime(),
-                endDate: new Date('2025-05-04').getTime(),
-                closedAt: new Date('2025-05-04').getTime(),
-                champions: [
-                    { cat: 'adult-m', name: '박태준', val: 48 },
-                    { cat: 'adult-f', name: '이하나', val: 41 },
-                    { cat: 'student-m', name: '정우성', val: 45 },
-                    { cat: 'student-f', name: '김아린', val: 38 }
-                ],
-                finalRankings: {
-                    'adult-m': [{id:uid(),name:'박태준',val:48},{id:uid(),name:'신동혁',val:44},{id:uid(),name:'이준서',val:40}],
-                    'adult-f': [{id:uid(),name:'이하나',val:41},{id:uid(),name:'최유리',val:36}],
-                    'student-m': [{id:uid(),name:'정우성',val:45},{id:uid(),name:'류현진',val:40},{id:uid(),name:'한승민',val:37}],
-                    'student-f': [{id:uid(),name:'김아린',val:38},{id:uid(),name:'윤소희',val:35}]
-                }
-            },
-            {
-                id: uid(), name: '미트 치기 유효타', description: '2분간 코치 미트를 정확하게 타격한 횟수를 기록합니다.',
-                reward: '토마토복싱 공식 후드집업',
-                startDate: new Date('2025-04-21').getTime(),
-                endDate: new Date('2025-04-27').getTime(),
-                closedAt: new Date('2025-04-27').getTime(),
-                champions: [
-                    { cat: 'adult-m', name: '최성재', val: 198 },
-                    { cat: 'adult-f', name: '오유나', val: 162 }
-                ],
-                finalRankings: {
-                    'adult-m': [{id:uid(),name:'최성재',val:198},{id:uid(),name:'강동원',val:185},{id:uid(),name:'이준석',val:171},{id:uid(),name:'김재현',val:158}],
-                    'adult-f': [{id:uid(),name:'오유나',val:162},{id:uid(),name:'한지수',val:150}],
-                    'student-m': [],
-                    'student-f': []
-                }
-            }
-        ];
-
-        let MISSION_HISTORY = JSON.parse(localStorage.getItem('TMT_HISTORY_V8')) || defaultHistory;
 
         let currentRankFilter = 'all';
         let adminRankFilter = 'all';
