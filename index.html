@@ -1078,9 +1078,9 @@
                     <button class="adm-close" onclick="closeAdmin()">✕</button>
                 </div>
                 <div class="adm-nav">
-                    <button class="adm-nav-btn active" onclick="switchPanel('panel-mission-reg', this)">미션 등록</button>
-                    <button class="adm-nav-btn" onclick="switchPanel('panel-ranking', this)">랭킹 관리</button>
+                    <button class="adm-nav-btn active" onclick="switchPanel('panel-mission-reg', this)">미션 관리</button>
                     <button class="adm-nav-btn" onclick="switchPanel('panel-mission-log', this)">미션 기록</button>
+                    <button class="adm-nav-btn" onclick="switchPanel('panel-champ', this)">역대 챔피언</button>
                     <button class="adm-nav-btn" onclick="switchPanel('panel-champ', this)">역대 챔피언</button>
                 </div>
             </div>
@@ -1195,6 +1195,46 @@
                         종료일 23:59에 자동으로 마감되며, 카테고리별 1위가 역대 챔피언으로 등록됩니다.
                     </div>
                 </div>
+
+                <!-- [C] 랭킹 기록 (진행 중인 미션 있을 때만 표시) -->
+                <div id="mission-ranking-section" style="display:none;">
+                    <hr class="section-divider" style="margin:24px 0;">
+                    <div class="mission-status-row">
+                        <div class="status-dot"></div>
+                        <div class="status-label">랭킹 기록</div>
+                    </div>
+                    <div class="add-record-form" style="margin-bottom:20px;">
+                        <div class="add-form-title">+ 새 기록 추가</div>
+                        <div class="form-row triple">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>카테고리</label>
+                                <select id="adm-r-cat">
+                                    <option value="adult-m">성인부 남</option>
+                                    <option value="adult-f">성인부 여</option>
+                                    <option value="student-m">학생부 남</option>
+                                    <option value="student-f">학생부 여</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>이름</label>
+                                <input type="text" id="adm-r-name" placeholder="참가자 이름">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label id="adm-r-val-label">기록 (회)</label>
+                                <input type="number" id="adm-r-val" placeholder="숫자 입력">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="addRankingRecord()" style="margin-top:14px;">기록 추가</button>
+                    </div>
+                    <div class="filter-tabs" id="ranking-filter-tabs">
+                        <button class="filter-tab active" onclick="setAdminRankFilter('all', this)">전체</button>
+                        <button class="filter-tab" onclick="setAdminRankFilter('adult-m', this)">성인부 남</button>
+                        <button class="filter-tab" onclick="setAdminRankFilter('adult-f', this)">성인부 여</button>
+                        <button class="filter-tab" onclick="setAdminRankFilter('student-m', this)">학생부 남</button>
+                        <button class="filter-tab" onclick="setAdminRankFilter('student-f', this)">학생부 여</button>
+                    </div>
+                    <div id="ranking-list-container"></div>
+                </div>
             </div>
 
             <!-- 패널2: 미션 기록 -->
@@ -1207,59 +1247,17 @@
                 </div>
             </div>
 
-            <!-- 패널2: 랭킹 -->
-            <div class="adm-panel" id="panel-ranking">
-                <div class="info-banner">
-                    <strong>현재 미션</strong>에 대한 랭킹 기록을 관리합니다. 카테고리별로 필터링하여 기록을 추가·수정·삭제할 수 있습니다.
-                </div>
-
-                <!-- 기록 추가 폼 — 상단 -->
-                <div class="add-record-form" style="margin-bottom:20px;">
-                    <div class="add-form-title">+ 새 기록 추가</div>
-                    <div class="form-row triple">
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label>카테고리</label>
-                            <select id="adm-r-cat">
-                                <option value="adult-m">성인부 남</option>
-                                <option value="adult-f">성인부 여</option>
-                                <option value="student-m">학생부 남</option>
-                                <option value="student-f">학생부 여</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label>이름</label>
-                            <input type="text" id="adm-r-name" placeholder="참가자 이름">
-                        </div>
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label id="adm-r-val-label">기록 (회)</label>
-                            <input type="number" id="adm-r-val" placeholder="숫자 입력">
-                        </div>
-                    </div>
-                    <button class="btn btn-primary btn-full" onclick="addRankingRecord()" style="margin-top:14px;">기록 추가</button>
-                </div>
-
-                <div class="filter-tabs" id="ranking-filter-tabs">
-                    <button class="filter-tab active" onclick="setAdminRankFilter('all', this)">전체</button>
-                    <button class="filter-tab" onclick="setAdminRankFilter('adult-m', this)">성인부 남</button>
-                    <button class="filter-tab" onclick="setAdminRankFilter('adult-f', this)">성인부 여</button>
-                    <button class="filter-tab" onclick="setAdminRankFilter('student-m', this)">학생부 남</button>
-                    <button class="filter-tab" onclick="setAdminRankFilter('student-f', this)">학생부 여</button>
-                </div>
-
-                <div id="ranking-list-container"></div>
-            </div>
-
             <!-- 패널3: 역대 챔피언 -->
             <div class="adm-panel" id="panel-champ">
                 <div class="info-banner">
                     <strong>미션별 역대 챔피언</strong> 목록입니다. 미션별로 가장 높은 기록 1개만 공개 화면에 표시됩니다.<br>
                     챔피언은 <strong>주간 종료 시 자동 등록</strong>되며, 잘못된 기록은 삭제할 수 있습니다.
                 </div>
-
-                <div id="champ-list-container">
-                    <!-- JS로 렌더링 -->
-                </div>
+                <div id="champ-list-container"></div>
             </div>
+
+            <!-- 구 panel-ranking (빈 껍데기 — JS 참조용) -->
+            <div style="display:none;" id="panel-ranking"></div>
         </div>
     </div>
 
@@ -1669,6 +1667,10 @@
         // ===== 관리자 패널 렌더링 =====
         function renderAdminRanking() {
             const container = document.getElementById('ranking-list-container');
+            const canAdd = hasMission() && !SITE_STATE.mission.closed;
+            const addForm = document.querySelector('#mission-ranking-section .add-record-form');
+            if (addForm) addForm.style.display = canAdd ? 'block' : 'none';
+
             let rows = [];
             const cats = adminRankFilter === 'all' ? Object.keys(RANKINGS) : [adminRankFilter];
             cats.forEach(cat => {
@@ -1762,6 +1764,9 @@
         }
 
         function addRankingRecord() {
+            if (!hasMission() || SITE_STATE.mission.closed) {
+                showToast('⚠ 진행 중인 미션이 없습니다.'); return;
+            }
             const cat    = document.getElementById('adm-r-cat').value;
             const nameEl = document.getElementById('adm-r-name');
             const valEl  = document.getElementById('adm-r-val');
@@ -2041,12 +2046,15 @@
         }
 
         function renderMissionPanel() {
-            // 미션 없음 or 종료됨 → 새 미션 등록 폼
+            const rankingSection = document.getElementById('mission-ranking-section');
+            // 미션 없음 or 종료됨 → 새 미션 등록 폼, 랭킹 섹션 숨김
             if (!hasMission() || SITE_STATE.mission.closed) {
                 showMissionEditMode(false);
+                if (rankingSection) rankingSection.style.display = 'none';
             } else {
-                // 진행 중 → 카드 뷰
+                // 진행 중 → 카드 뷰 + 랭킹 섹션 표시
                 showMissionViewMode();
+                if (rankingSection) rankingSection.style.display = 'block';
             }
         }
 
