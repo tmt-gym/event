@@ -1426,7 +1426,6 @@
                 return;
             }
 
-            // 순위 부여
             let rank = 0, lastVal = -1, skip = 1;
             const ranked = all.map(item => {
                 if (item.val !== lastVal) { rank += skip; skip = 1; } else { skip++; }
@@ -1434,39 +1433,49 @@
                 return { ...item, rank };
             });
 
-            const top3   = ranked.filter(r => r.rank <= 3);
-            const rest   = ranked.filter(r => r.rank > 3);
+            const top3  = ranked.filter(r => r.rank <= 3);
+            const rest  = ranked.filter(r => r.rank > 3);
             const first  = top3.find(r => r.rank === 1);
             const second = top3.find(r => r.rank === 2);
             const third  = top3.find(r => r.rank === 3);
-            const trophies = { 1:'🥇', 2:'🥈', 3:'🥉' };
 
-            const podiumCard = (item, cls) => item ? `
-                <div class="pd-item ${cls}">
-                    <div class="pd-trophy">${trophies[item.rank]}</div>
-                    <div class="pd-rank">${item.rank}위</div>
-                    <div class="pd-cat">${CAT_NAMES[item.cat] || ''}</div>
-                    <div class="pd-name">${item.name}</div>
-                    <div class="pd-score">${item.val}<span class="pd-unit">${unit}</span></div>
-                </div>` : `<div class="pd-item ${cls} pd-empty"></div>`;
+            const crownSvg = `<svg class="rank-icon" viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
 
-            const podium = `<div class="podium-wrap">
-                ${podiumCard(second, 'second')}
-                ${podiumCard(first,  'first')}
-                ${podiumCard(third,  'third')}
+            const rankCard = (item) => item ? `
+                <div class="rank-card rank-${item.rank} reveal">
+                    <div class="rank-card-header">
+                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${item.rank}순위</div></div>
+                        <div class="rank-cat">${CAT_NAMES[item.cat] || ''}</div>
+                    </div>
+                    <div class="rank-card-body">
+                        <div class="rank-name">${item.name}</div>
+                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">${unit}</span></div></div>
+                    </div>
+                </div>` : `<div style="visibility:hidden;" class="rank-card"></div>`;
+
+            // 시상대: 2위 / 1위 / 3위
+            const podium = `<div class="ranking-grid" style="align-items:flex-end;">
+                ${rankCard(second)}
+                ${rankCard(first)}
+                ${rankCard(third)}
             </div>`;
 
-            const list = rest.length > 0 ? `<div class="pd-list">` + rest.map(item => `
-                <div class="pd-row">
-                    <span class="pd-row-num">${item.rank}</span>
-                    <div class="pd-row-info">
-                        <span class="pd-row-name">${item.name}</span>
-                        <span class="pd-row-cat">${CAT_NAMES[item.cat] || ''}</span>
+            // 4위~
+            const list = rest.length > 0 ? `<div class="ranking-grid" style="margin-top:12px;">` +
+                rest.map(item => `
+                <div class="rank-card rank-${Math.min(item.rank,5)} reveal">
+                    <div class="rank-card-header">
+                        <div class="rank-header-left">${crownSvg}<div class="rank-num-display">${item.rank}순위</div></div>
+                        <div class="rank-cat">${CAT_NAMES[item.cat] || ''}</div>
                     </div>
-                    <span class="pd-row-score">${item.val}<span class="pd-row-unit">${unit}</span></span>
+                    <div class="rank-card-body">
+                        <div class="rank-name">${item.name}</div>
+                        <div class="rank-val-box"><div class="rank-val">${item.val}<span class="rank-unit">${unit}</span></div></div>
+                    </div>
                 </div>`).join('') + `</div>` : '';
 
             container.innerHTML = podium + list;
+            document.querySelectorAll('#result-ranking-container .reveal').forEach(el => obs.observe(el));
         }
 
         function updateTimer() {
