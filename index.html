@@ -1344,7 +1344,9 @@
                 renderAll();
                 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
             } else {
+                const adminOpen = document.getElementById('admin-modal').classList.contains('open');
                 renderAll();
+                if (!adminOpen) renderMissionPanel();
             }
         });
 
@@ -1666,6 +1668,8 @@
         // ===== 관리자 패널 렌더링 =====
         function renderAdminRanking() {
             const container = document.getElementById('ranking-list-container');
+            if (!container) return;
+
             const canAdd = hasMission() && !SITE_STATE.mission.closed;
             const addForm = document.querySelector('#mission-ranking-section .add-record-form');
             if (addForm) addForm.style.display = canAdd ? 'block' : 'none';
