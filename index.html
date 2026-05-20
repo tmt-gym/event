@@ -1343,6 +1343,7 @@
                 initialized = true;
                 showLoading(false);
                 renderAll();
+                renderMissionPanel();
                 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
             } else {
                 const adminOpen = document.getElementById('admin-modal').classList.contains('open');
@@ -1783,16 +1784,21 @@
                 showToast('⚠ 이름과 기록을 모두 입력하세요.'); return;
             }
 
-            RANKINGS[cat].push({ id: uid(), name, val });
-            saveData();
-            renderRankings(); // 뷰 랭킹만 업데이트
-            renderAdminRanking();
+            // 입력값 즉시 초기화 (Firebase 응답 전에)
+            nameEl.value = '';
+            valEl.value  = '';
+            nameEl.blur();
+            valEl.blur();
 
-            // 렌더 후 새로 DOM 참조해서 초기화 + 포커스 해제
-            const nameElAfter = document.getElementById('adm-r-name');
-            const valElAfter  = document.getElementById('adm-r-val');
-            if (nameElAfter) { nameElAfter.value = ''; nameElAfter.blur(); }
-            if (valElAfter)  { valElAfter.value  = ''; valElAfter.blur(); }
+            // RANKINGS에 추가 후 Firebase에 rankings만 업데이트
+            RANKINGS[cat].push({ id: uid(), name, val });
+
+            // 전체 saveData 대신 rankings만 직접 업데이트 → 리스너 재실행되지만 관리자 패널 보호
+            ROOT.child('rankings').set(RANKINGS).catch(err => console.error(err));
+
+            // 로컬 뷰 즉시 업데이트
+            renderRankings();
+            renderAdminRanking();
 
             showToast(`✅ ${CAT_NAMES[cat]} — ${name} (${val}${unit}) 추가됨`);
         }
