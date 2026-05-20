@@ -1314,31 +1314,43 @@
             document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
         }
 
+        let isWriting = false; // Firebase 저장 중 리스너 덮어쓰기 방지
+
         // ===== 저장 (Firebase에 쓰기) =====
         function saveData() {
+            isWriting = true;
             ROOT.set({
                 state:   SITE_STATE,
                 rankings: RANKINGS,
                 history: MISSION_HISTORY
-            }).catch(err => console.error('Firebase 저장 오류:', err));
+            }).then(() => {
+                isWriting = false;
+            }).catch(err => {
+                isWriting = false;
+                console.error('Firebase 저장 오류:', err);
+            });
         }
 
         // ===== 초기 데이터 로드 + 실시간 리스너 =====
         let initialized = false;
         ROOT.on('value', snapshot => {
             const data = snapshot.val();
-            if (data) {
-                SITE_STATE      = data.state    || { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
-                if (SITE_STATE.mission && SITE_STATE.mission.closed === undefined) SITE_STATE.mission.closed = false;
-                RANKINGS        = data.rankings || { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
-                MISSION_HISTORY = data.history  || [];
-            } else {
-                // 최초 접속 — 빈 상태로 시작
-                SITE_STATE      = { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
-                RANKINGS        = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
-                MISSION_HISTORY = [];
-                saveData();
+
+            // 저장 중일 때는 리스너가 로컬 데이터를 덮어쓰지 않음
+            if (!initialized || !isWriting) {
+                if (data) {
+                    SITE_STATE      = data.state    || { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
+                    if (SITE_STATE.mission && SITE_STATE.mission.closed === undefined) SITE_STATE.mission.closed = false;
+                    RANKINGS        = data.rankings || { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
+                    MISSION_HISTORY = data.history  || [];
+                } else {
+                    SITE_STATE      = { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
+                    RANKINGS        = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
+                    MISSION_HISTORY = [];
+                    saveData();
+                }
             }
+
             if (!initialized) {
                 initialized = true;
                 showLoading(false);
@@ -1349,7 +1361,6 @@
                 const adminOpen = document.getElementById('admin-modal').classList.contains('open');
                 renderAll();
                 if (adminOpen) {
-                    // 관리자 모달 열려있을 때: 패널 재설정 없이 랭킹 테이블만 갱신
                     renderAdminRanking();
                 } else {
                     renderMissionPanel();
