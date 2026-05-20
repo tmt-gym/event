@@ -1677,6 +1677,12 @@
             const container = document.getElementById('ranking-list-container');
             if (!container) return;
 
+            // mission-ranking-section 표시 상태 보장
+            const rankingSection = document.getElementById('mission-ranking-section');
+            if (rankingSection && isMissionActive()) {
+                rankingSection.style.display = 'block';
+            }
+
             const canAdd = isMissionActive();
             const addForm = document.querySelector('#mission-ranking-section .add-record-form');
             if (addForm) addForm.style.display = canAdd ? 'block' : 'none';
