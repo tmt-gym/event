@@ -1314,41 +1314,40 @@
             document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
         }
 
-        let isWriting = false; // Firebase 저장 중 리스너 덮어쓰기 방지
+        let isWriting = false;
 
         // ===== 저장 (Firebase에 쓰기) =====
         function saveData() {
-            isWriting = true;
             ROOT.set({
                 state:   SITE_STATE,
                 rankings: RANKINGS,
                 history: MISSION_HISTORY
-            }).then(() => {
-                isWriting = false;
-            }).catch(err => {
-                isWriting = false;
-                console.error('Firebase 저장 오류:', err);
-            });
+            }).catch(err => console.error('Firebase 저장 오류:', err));
         }
 
         // ===== 초기 데이터 로드 + 실시간 리스너 =====
         let initialized = false;
         ROOT.on('value', snapshot => {
             const data = snapshot.val();
+            if (data) {
+                SITE_STATE      = data.state    || { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
+                if (SITE_STATE.mission && SITE_STATE.mission.closed === undefined) SITE_STATE.mission.closed = false;
 
-            // 저장 중일 때는 리스너가 로컬 데이터를 덮어쓰지 않음
-            if (!initialized || !isWriting) {
-                if (data) {
-                    SITE_STATE      = data.state    || { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
-                    if (SITE_STATE.mission && SITE_STATE.mission.closed === undefined) SITE_STATE.mission.closed = false;
-                    RANKINGS        = data.rankings || { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
-                    MISSION_HISTORY = data.history  || [];
-                } else {
-                    SITE_STATE      = { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
-                    RANKINGS        = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
-                    MISSION_HISTORY = [];
-                    saveData();
-                }
+                // Firebase는 배열을 객체로 저장하므로 각 카테고리를 배열로 변환
+                const rawRankings = data.rankings || {};
+                RANKINGS = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
+                Object.keys(RANKINGS).forEach(cat => {
+                    const raw = rawRankings[cat];
+                    if (!raw) return;
+                    RANKINGS[cat] = Array.isArray(raw) ? raw : Object.values(raw);
+                });
+
+                MISSION_HISTORY = data.history ? (Array.isArray(data.history) ? data.history : Object.values(data.history)) : [];
+            } else {
+                SITE_STATE      = { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
+                RANKINGS        = { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
+                MISSION_HISTORY = [];
+                saveData();
             }
 
             if (!initialized) {
