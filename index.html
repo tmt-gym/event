@@ -1779,7 +1779,9 @@
             }
 
             RANKINGS[cat].push({ id: uid(), name, val });
-            saveData(); renderAll(); renderAdminRanking();
+            saveData();
+            renderRankings(); // 뷰 랭킹만 업데이트
+            renderAdminRanking();
 
             // 렌더 후 새로 DOM 참조해서 초기화 + 포커스 해제
             const nameElAfter = document.getElementById('adm-r-name');
