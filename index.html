@@ -95,7 +95,8 @@
         .rank-card.rank-4, .rank-card.rank-5 { border: 1px solid rgba(160, 160, 160, 0.1); }
         .rank-icon { width: 32px; height: 32px; margin: 0 auto 15px; display: block; }
         .rank-1 .rank-icon, .rank-2 .rank-icon, .rank-3 .rank-icon { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3)); }
-        .rank-2 .rank-icon, .rank-3 .rank-icon { display: none; }
+        .rank-2 .rank-icon { fill: var(--silver); }
+        .rank-3 .rank-icon { fill: var(--bronze); }
         .rank-4 .rank-icon, .rank-5 .rank-icon { fill: var(--iron); }
         .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.9rem; margin-bottom: 12px; letter-spacing: -0.5px; }
         .rank-1 .rank-num-display, .rank-2 .rank-num-display, .rank-3 .rank-num-display { color: var(--gold); }
@@ -1664,6 +1665,7 @@
                             <th>미션</th>
                             <th>챔피언</th>
                             <th>기록</th>
+                            <th style="width:60px">관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1671,9 +1673,21 @@
                             <td><span class="mission-tag">${c.mission}</span></td>
                             <td>${c.name}</td>
                             <td><span class="champ-score">${c.val}</span> <span style="font-size:0.8rem;color:var(--muted)">${c.unit}</span></td>
+                            <td>
+                                <button class="btn-icon danger" onclick="deleteChampByMission('${c.mission}')" title="삭제">
+                                    <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                </button>
+                            </td>
                         </tr>`).join('')}
                     </tbody>
                 </table>`;
+        }
+
+        function deleteChampByMission(missionName) {
+            if (!confirm(`"${missionName}" 미션의 챔피언 기록을 삭제하시겠습니까?\n해당 미션의 히스토리에서 모든 기록이 제거됩니다.`)) return;
+            MISSION_HISTORY = MISSION_HISTORY.filter(m => m.name !== missionName);
+            saveData(); renderAdminChamps(); renderChampions();
+            showToast('🗑 챔피언 기록이 삭제되었습니다.');
         }
 
         function setRankingFilter(f) {
