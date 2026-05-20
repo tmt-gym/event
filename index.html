@@ -990,7 +990,7 @@
 
             <!-- 종료된 미션 정보 (진행중보다 작게, 색상은 잘 보이게) -->
             <div style="text-align:center; margin-bottom:36px;">
-                <h2 class="mission-title" id="result-mission-name" style="color:#ccc;"></h2>
+                <h2 class="mission-title" id="result-mission-name" style="color:#fff;"></h2>
                 <p class="mission-desc" style="color:#666; margin-bottom:14px;" id="result-mission-desc"></p>
                 <div style="display:inline-flex; align-items:center; gap:7px; background:#0d0d0d; border:1px solid #2a2a2a; border-radius:6px; padding:10px 18px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
@@ -1080,7 +1080,6 @@
                 <div class="adm-nav">
                     <button class="adm-nav-btn active" onclick="switchPanel('panel-mission-reg', this)">미션 및 기록관리</button>
                     <button class="adm-nav-btn" onclick="switchPanel('panel-mission-log', this)">미션 기록</button>
-                    <button class="adm-nav-btn" onclick="switchPanel('panel-champ', this)">역대 챔피언</button>
                     <button class="adm-nav-btn" onclick="switchPanel('panel-champ', this)">역대 챔피언</button>
                 </div>
             </div>
@@ -1192,7 +1191,7 @@
 
                     <div class="auto-close-notice">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="flex-shrink:0;margin-top:1px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                        종료일 23:59에 자동으로 마감되며, 카테고리별 1위가 역대 챔피언으로 등록됩니다.
+                        종료일 23:59에 자동으로 마감되며, 미션 전체 기간의 최고 기록자가 역대 챔피언으로 등록됩니다.
                     </div>
                 </div>
 
@@ -1267,7 +1266,7 @@
             <div class="confirm-icon">🏆</div>
             <div class="confirm-title">주간 미션 종료</div>
             <div class="confirm-desc">
-                아래 카테고리별 1위 기록자가 <strong style="color:var(--gold)">역대 챔피언으로 자동 등록</strong>됩니다.<br>
+                아래 최고 기록자가 <strong style="color:var(--gold)">역대 챔피언으로 자동 등록</strong>됩니다.<br>
                 현재 랭킹은 초기화되며, 미션은 히스토리에 보관됩니다.
             </div>
             <div class="confirm-preview">
@@ -1782,11 +1781,11 @@
             RANKINGS[cat].push({ id: uid(), name, val });
             saveData(); renderAll(); renderAdminRanking();
 
-            // 입력값 초기화 + 포커스 해제 (모바일 키보드 이슈 방지)
-            nameEl.value = '';
-            valEl.value  = '';
-            nameEl.blur();
-            valEl.blur();
+            // 렌더 후 새로 DOM 참조해서 초기화 + 포커스 해제
+            const nameElAfter = document.getElementById('adm-r-name');
+            const valElAfter  = document.getElementById('adm-r-val');
+            if (nameElAfter) { nameElAfter.value = ''; nameElAfter.blur(); }
+            if (valElAfter)  { valElAfter.value  = ''; valElAfter.blur(); }
 
             showToast(`✅ ${CAT_NAMES[cat]} — ${name} (${val}${unit}) 추가됨`);
         }
