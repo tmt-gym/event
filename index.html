@@ -1348,7 +1348,12 @@
             } else {
                 const adminOpen = document.getElementById('admin-modal').classList.contains('open');
                 renderAll();
-                if (!adminOpen) renderMissionPanel();
+                if (adminOpen) {
+                    // 관리자 모달 열려있을 때: 패널 재설정 없이 랭킹 테이블만 갱신
+                    renderAdminRanking();
+                } else {
+                    renderMissionPanel();
+                }
             }
         });
 
@@ -1784,19 +1789,17 @@
                 showToast('⚠ 이름과 기록을 모두 입력하세요.'); return;
             }
 
-            // 입력값 즉시 초기화 (Firebase 응답 전에)
+            // 입력값 즉시 초기화
             nameEl.value = '';
             valEl.value  = '';
             nameEl.blur();
             valEl.blur();
 
-            // RANKINGS에 추가 후 Firebase에 rankings만 업데이트
+            // 데이터 추가 및 저장
             RANKINGS[cat].push({ id: uid(), name, val });
+            saveData();
 
-            // 전체 saveData 대신 rankings만 직접 업데이트 → 리스너 재실행되지만 관리자 패널 보호
-            ROOT.child('rankings').set(RANKINGS).catch(err => console.error(err));
-
-            // 로컬 뷰 즉시 업데이트
+            // 로컬 즉시 반영
             renderRankings();
             renderAdminRanking();
 
