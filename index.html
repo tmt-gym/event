@@ -1329,6 +1329,7 @@
             const data = snapshot.val();
             if (data) {
                 SITE_STATE      = data.state    || { mission: { name: '', description: '', reward: '', status: 'hidden', unit: '회' } };
+                if (SITE_STATE.mission && SITE_STATE.mission.closed === undefined) SITE_STATE.mission.closed = false;
                 RANKINGS        = data.rankings || { 'adult-m': [], 'adult-f': [], 'student-m': [], 'student-f': [] };
                 MISSION_HISTORY = data.history  || [];
             } else {
@@ -1670,7 +1671,7 @@
             const container = document.getElementById('ranking-list-container');
             if (!container) return;
 
-            const canAdd = hasMission() && !SITE_STATE.mission.closed;
+            const canAdd = isMissionActive();
             const addForm = document.querySelector('#mission-ranking-section .add-record-form');
             if (addForm) addForm.style.display = canAdd ? 'block' : 'none';
 
@@ -1767,7 +1768,7 @@
         }
 
         function addRankingRecord() {
-            if (!hasMission() || SITE_STATE.mission.closed) {
+            if (!isMissionActive()) {
                 showToast('⚠ 진행 중인 미션이 없습니다.'); return;
             }
             const cat    = document.getElementById('adm-r-cat').value;
@@ -2047,17 +2048,19 @@
 
         // ===== 미션 등록 패널 분기 =====
         function hasMission() {
-            return !!(SITE_STATE.mission.name && SITE_STATE.mission.name.trim());
+            return !!(SITE_STATE.mission && SITE_STATE.mission.name && SITE_STATE.mission.name.trim());
+        }
+
+        function isMissionActive() {
+            return hasMission() && !SITE_STATE.mission.closed;
         }
 
         function renderMissionPanel() {
             const rankingSection = document.getElementById('mission-ranking-section');
-            // 미션 없음 or 종료됨 → 새 미션 등록 폼, 랭킹 섹션 숨김
-            if (!hasMission() || SITE_STATE.mission.closed) {
+            if (!isMissionActive()) {
                 showMissionEditMode(false);
                 if (rankingSection) rankingSection.style.display = 'none';
             } else {
-                // 진행 중 → 카드 뷰 + 랭킹 섹션 표시
                 showMissionViewMode();
                 if (rankingSection) rankingSection.style.display = 'block';
             }
