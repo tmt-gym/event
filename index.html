@@ -88,25 +88,30 @@
         .rank-card-header { display: block; }
         .rank-header-left { display: block; }
         .rank-card-body { display: block; }
-        .rank-card { background: linear-gradient(145deg, #1a1a1a 0%, #111 100%); border: 1px solid var(--border); padding: 25px 15px; border-radius: 12px; position: relative; overflow: hidden; display: flex; flex-direction: column; text-align: center; min-height: 250px; transition: border-color 0.3s ease; }
+        /* 랭킹 카드 — 모바일 스타일 기본 적용 */
+        .rank-card { background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%); border: 1px solid #222; border-radius: 12px; padding: 20px 20px; min-height: auto; display: flex; flex-direction: column; align-items: stretch; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: border-color 0.3s ease; position: relative; overflow: hidden; }
         .rank-card:hover { border-color: var(--muted); }
-        .rank-card.rank-1, .rank-card.rank-2, .rank-card.rank-3 { border: 1px solid rgba(255, 215, 0, 0.2); background: linear-gradient(145deg, #1e1a00 0%, #111 100%); }
-        .rank-card.rank-1 { border-color: var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .rank-card.rank-4, .rank-card.rank-5 { border: 1px solid rgba(160, 160, 160, 0.1); }
-        .rank-icon { width: 32px; height: 32px; margin: 0 auto 15px; display: block; }
-        .rank-1 .rank-icon, .rank-2 .rank-icon, .rank-3 .rank-icon { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3)); }
+        .rank-card.rank-1 { border-color: var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: linear-gradient(135deg, #1a1500 0%, #0a0a0a 100%); }
+        .rank-card.rank-2, .rank-card.rank-3 { border: 1px solid rgba(255,215,0,0.1); background: linear-gradient(135deg, #151510 0%, #0a0a0a 100%); }
+        .rank-card.rank-4, .rank-card.rank-5 { border: 1px solid rgba(160,160,160,0.1); }
+
+        .rank-card-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px; }
+        .rank-header-left { display: flex; align-items: center; gap: 8px; }
+        .rank-icon { width: 24px; height: 24px; margin: 0; display: inline-block; }
+        .rank-1 .rank-icon { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(255,215,0,0.3)); }
         .rank-2 .rank-icon { fill: var(--silver); }
         .rank-3 .rank-icon { fill: var(--bronze); }
         .rank-4 .rank-icon, .rank-5 .rank-icon { fill: var(--iron); }
-        .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 0.9rem; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 1.05rem; margin: 0; display: inline-block; }
         .rank-1 .rank-num-display, .rank-2 .rank-num-display, .rank-3 .rank-num-display { color: var(--gold); }
         .rank-4 .rank-num-display, .rank-5 .rank-num-display { color: var(--iron); }
-        .rank-cat { font-size: 0.78rem; color: var(--muted); font-weight: var(--weight-regular); margin-bottom: 4px; text-transform: uppercase; }
-        .rank-name { font-size: 1.3rem; font-weight: var(--weight-bold); margin-bottom: 20px; color: #FFF; letter-spacing: -0.5px; position: relative; }
-        .rank-val-box { margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .rank-val { font-family: var(--font-num); font-size: 2.2rem; color: #FFF; line-height: 1; }
+        .rank-cat { font-size: 0.78rem; color: var(--muted); font-weight: var(--weight-regular); margin: 0; text-transform: uppercase; text-align: right; }
+        .rank-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: none; padding-top: 0; gap: 12px; }
+        .rank-name { font-size: 1.15rem; font-weight: var(--weight-bold); margin: 0; color: #FFF; letter-spacing: -0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; border-right: 1px dashed #222; padding-right: 12px; }
+        .rank-val-box { border: none; padding: 0; margin: 0; flex-shrink: 0; }
+        .rank-val { font-family: var(--font-num); font-size: 2rem; color: #FFF; line-height: 1; }
         .rank-1 .rank-val, .rank-2 .rank-val, .rank-3 .rank-val { color: var(--gold); }
-        .rank-unit { font-size: 1rem; color: var(--muted); margin-left: 4px; font-family: var(--font-body); font-weight: var(--weight-semibold); }
+        .rank-unit { font-size: 0.75rem; color: var(--muted); margin-left: 2px; font-family: var(--font-body); font-weight: var(--weight-semibold); }
 
         .champion-card { background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%); border: 1px solid #222; border-radius: 12px; padding: 20px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.4); min-height: 100px; transition: border-color 0.3s ease; }
         .champion-card::before { content: ''; position: absolute; left: 0; top: 15%; bottom: 15%; width: 3px; background: var(--red); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--red); }
@@ -126,20 +131,11 @@
             .ranking-grid { grid-template-columns: 1fr; gap: 12px; }
             .mission-title { font-size: clamp(2.1rem, 6.5vw, 3.1rem); }
             .info-value { font-size: clamp(1.35rem, 5vw, 1.85rem); }
-            .rank-card { background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%); border: 1px solid #222; border-radius: 12px; padding: 20px 20px; min-height: auto; display: flex; flex-direction: column; align-items: stretch; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-            .rank-card::before { display: none; }
-            .rank-card.rank-1::before, .rank-card.rank-2::before, .rank-card.rank-3::before { display: none; }
-            .rank-card-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px; }
-            .rank-header-left { display: flex; align-items: center; gap: 8px; }
-            .rank-icon { width: 24px; height: 24px; margin: 0; display: inline-block; }
-            .rank-num-display { font-family: var(--font-display); font-weight: var(--weight-bold); font-size: 1.05rem; margin: 0; display: inline-block; }
-            .rank-cat { font-size: 0.75rem; font-weight: var(--weight-regular); margin: 0; text-transform: uppercase; text-align: right; color: var(--muted); }
-            .rank-card-body { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: none; padding-top: 0; gap: 12px; }
-            .rank-name { font-family: var(--font-body); font-size: 1.15rem; font-weight: var(--weight-bold); color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; flex: 1; border-right: 1px dashed #222; padding-right: 12px; }
-            .rank-val-box { border: none; padding: 0; margin: 0; flex-shrink: 0; }
-            .rank-val { font-family: var(--font-num); font-size: 2rem; line-height: 1; }
+            .rank-num-display { font-size: 1.05rem; }
+            .rank-cat { font-size: 0.75rem; }
+            .rank-name { font-size: 1.15rem; }
+            .rank-val { font-size: 2rem; }
             .rank-unit { font-size: 0.75rem; }
-            .rank-bg-num { display: none; }
 
             /* 시상대: 모바일에서도 3열 유지하되 카드 간소화 */
             .podium-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
