@@ -162,7 +162,7 @@
         .admin-fab {
             display: flex;
             justify-content: center;
-            padding: 24px 0 32px;
+            padding: 0 0 32px;
         }
         .admin-fab-btn {
             background: none;
@@ -1655,29 +1655,21 @@
                 container.innerHTML = `<div class="empty-state" style="margin-bottom:0;"><p class="empty-text">등록된 챔피언이 없습니다.</p></div>`;
                 return;
             }
-            container.innerHTML = `
-                <table class="champ-table">
-                    <thead>
-                        <tr>
-                            <th>미션</th>
-                            <th>챔피언</th>
-                            <th>기록</th>
-                            <th style="width:60px">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${champs.map(c => `<tr>
-                            <td><span class="mission-tag">${c.mission}</span></td>
-                            <td>${c.name}</td>
-                            <td><span class="champ-score">${c.val}</span> <span style="font-size:0.8rem;color:var(--muted)">${c.unit}</span></td>
-                            <td>
-                                <button class="btn-icon danger" onclick="deleteChampByMission('${c.mission}')" title="삭제">
-                                    <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                                </button>
-                            </td>
-                        </tr>`).join('')}
-                    </tbody>
-                </table>`;
+            container.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px;">` +
+                champs.map(c => `
+                <div style="background:#0d0d0d; border:1px solid #1e1e1e; border-left:3px solid var(--red); border-radius:8px; padding:14px 16px; display:flex; align-items:center; gap:12px;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:0.72rem; color:var(--red); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">${c.mission}</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:0.95rem; font-weight:700; color:#fff; font-family:var(--font-body);">${c.name}</span>
+                            <span style="font-size:0.7rem; color:#555;">${CAT_NAMES[c.cat] || ''}</span>
+                        </div>
+                    </div>
+                    <div style="font-family:var(--font-num); font-size:1.4rem; color:var(--gold); flex-shrink:0;">${c.val}<span style="font-size:0.7rem; color:#666; margin-left:2px; font-family:var(--font-body);">${c.unit}</span></div>
+                    <button class="btn-icon danger" onclick="deleteChampByMission('${c.mission}')" title="삭제" style="flex-shrink:0;">
+                        <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                </div>`).join('') + `</div>`;
         }
 
         function deleteChampByMission(missionName) {
