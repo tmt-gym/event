@@ -1618,8 +1618,11 @@
             const ann       = SITE_STATE.champAnnouncement;
             const now       = new Date().getTime();
 
-            // ① 챔피언 탄생 안내 배너 (1주일 이내)
-            if (ann && (now - ann.announcedAt) < WEEK_MS) {
+            // ② 히스토리에서 미션별 최고 기록 1명 추출
+            const champs = getChampsByHistory();
+
+            // ① 챔피언이 있고 1주일 이내일 때만 배너 표시
+            if (champs.length > 0 && ann && (now - ann.announcedAt) < WEEK_MS) {
                 const champName = ann.champions && ann.champions[0] ? ann.champions[0].name : '';
                 banner.innerHTML = `
                     <div class="champ-announcement-banner">
@@ -1632,9 +1635,6 @@
                 banner.style.display = 'none';
                 banner.innerHTML = '';
             }
-
-            // ② 히스토리에서 미션별 최고 기록 1명 추출
-            const champs = getChampsByHistory();
             if (champs.length === 0) {
                 container.innerHTML = `<div class="empty-state"><p class="empty-text">첫 번째 챔피언에 도전하세요!</p></div>`;
                 return;
@@ -2059,6 +2059,7 @@
             // 삭제된 미션이 현재 배너에 표시 중이면 배너도 초기화
             if (SITE_STATE.champAnnouncement && SITE_STATE.champAnnouncement.missionName === m.name) {
                 SITE_STATE.champAnnouncement = null;
+                ROOT.child('state/champAnnouncement').remove();
             }
 
             saveData();
