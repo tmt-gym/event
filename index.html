@@ -1405,8 +1405,15 @@
             if (SITE_STATE.mission.closed) {
                 missionSection.style.display  = 'none';
                 rankingSection.style.display  = 'none';
-                resultSection.style.display   = 'block';
                 champSection.style.display    = '';
+
+                // 히스토리가 없으면 최종 랭킹 섹션 숨김
+                if (MISSION_HISTORY.length === 0) {
+                    resultSection.style.display = 'none';
+                    return;
+                }
+
+                resultSection.style.display   = 'block';
 
                 // 종료된 미션 정보 + 최신 히스토리 기록 표시
                 document.getElementById('result-mission-name').innerHTML = `${SITE_STATE.mission.name}<br><span style="color:var(--red);">최종 랭킹</span>`;
@@ -1914,8 +1921,8 @@
 
         // ===== 미션 기록 (히스토리) 렌더링 =====
         function renderMissionHistory() {
-            // 드롭다운 (미션 등록 탭용 — 이름+설명만 불러옴)
             const sel = document.getElementById('quick-load-select');
+            if (!sel) return;
             sel.innerHTML = '<option value="">— 미션 선택 —</option>' +
                 MISSION_HISTORY.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
         }
