@@ -2055,10 +2055,16 @@
             if (!m) return;
             if (!confirm(`"${m.name}" 미션 기록을 삭제하시겠습니까?\n랭킹 기록과 챔피언 데이터도 함께 삭제됩니다.`)) return;
             MISSION_HISTORY = MISSION_HISTORY.filter(h => h.id !== id);
+
+            // 삭제된 미션이 현재 배너에 표시 중이면 배너도 초기화
+            if (SITE_STATE.champAnnouncement && SITE_STATE.champAnnouncement.missionName === m.name) {
+                SITE_STATE.champAnnouncement = null;
+            }
+
             saveData();
+            renderAll();
             renderMissionLog();
             renderMissionHistory();
-            renderChampions();
             renderAdminChamps();
             showToast('🗑 미션 기록이 삭제되었습니다.');
         }
