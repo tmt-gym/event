@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>토마토복싱 챌린지 기록실</title>
+    <title>토마토복싱 챌린지</title>
 
     <!-- Firebase SDK — head에서 먼저 로드 -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1153,7 +1153,7 @@
                             <div class="date-wrap">
                                 <input type="date" id="adm-m-startdate" oninput="updateDateDisplay('adm-m-startdate','start-display')">
                                 <div class="date-display" id="start-display">
-                                    <svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#888"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
                                     <span class="date-placeholder">날짜 선택</span>
                                 </div>
                             </div>
@@ -1163,7 +1163,7 @@
                             <div class="date-wrap">
                                 <input type="date" id="adm-m-enddate" oninput="updateDateDisplay('adm-m-enddate','end-display')">
                                 <div class="date-display" id="end-display">
-                                    <svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#888"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
                                     <span class="date-placeholder">날짜 선택</span>
                                 </div>
                             </div>
@@ -1960,15 +1960,20 @@
                 if (!logCatState[m.id]) logCatState[m.id] = 'all';
 
                 return `<div class="log-item" id="log-${m.id}">
-                    <div class="log-item-header" onclick="${hasAny ? `toggleLog('${m.id}')` : ''}">
-                        <div class="log-item-left">
+                    <div class="log-item-header">
+                        <div class="log-item-left" onclick="${hasAny ? `toggleLog('${m.id}')` : ''}" style="flex:1; cursor:${hasAny ? 'pointer' : 'default'};">
                             <span class="log-item-name">${m.name}</span>
                             <div class="log-item-meta-row">
                                 <span class="log-meta-date">${dateRange}</span>
                                 ${m.reward ? `<span class="log-meta-sep">·</span><span class="log-meta-reward">${m.reward}</span>` : ''}
                             </div>
                         </div>
-                        ${hasAny ? `<svg class="log-toggle-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>` : ''}
+                        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                            ${hasAny ? `<svg class="log-toggle-icon" viewBox="0 0 24 24" onclick="toggleLog('${m.id}')" style="cursor:pointer;"><path d="M7 10l5 5 5-5z"/></svg>` : ''}
+                            <button class="btn-icon danger" onclick="deleteMissionHistory('${m.id}')" title="삭제">
+                                <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            </button>
+                        </div>
                     </div>
                     ${hasAny ? `
                     <div class="log-item-body" id="log-body-${m.id}">
@@ -2036,6 +2041,19 @@
         function toggleLog(id) {
             const el = document.getElementById(`log-${id}`);
             if (el) el.classList.toggle('open');
+        }
+
+        function deleteMissionHistory(id) {
+            const m = MISSION_HISTORY.find(h => h.id === id);
+            if (!m) return;
+            if (!confirm(`"${m.name}" 미션 기록을 삭제하시겠습니까?\n랭킹 기록과 챔피언 데이터도 함께 삭제됩니다.`)) return;
+            MISSION_HISTORY = MISSION_HISTORY.filter(h => h.id !== id);
+            saveData();
+            renderMissionLog();
+            renderMissionHistory();
+            renderChampions();
+            renderAdminChamps();
+            showToast('🗑 미션 기록이 삭제되었습니다.');
         }
 
         function loadMission(id) {
@@ -2126,8 +2144,8 @@
 
                 document.getElementById('adm-m-startdate').value = '';
                 document.getElementById('adm-m-enddate').value   = '';
-                document.getElementById('start-display').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
-                document.getElementById('end-display').innerHTML   = `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
+                document.getElementById('start-display').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#888"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
+                document.getElementById('end-display').innerHTML   = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#888"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
 
                 if (m.startDate) {
                     const s = new Date(m.startDate);
@@ -2148,8 +2166,8 @@
                 document.getElementById('adm-m-unit').value   = '회';
                 document.getElementById('adm-m-startdate').value = '';
                 document.getElementById('adm-m-enddate').value   = '';
-                document.getElementById('start-display').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
-                document.getElementById('end-display').innerHTML   = `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
+                document.getElementById('start-display').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#888"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
+                document.getElementById('end-display').innerHTML   = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#888"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="date-placeholder">날짜 선택</span>`;
             }
 
             document.getElementById('edit-cancel-btn').style.display = isEdit ? '' : 'none';
