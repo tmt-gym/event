@@ -803,7 +803,16 @@ function renderRanking() {
 }
 
 function resetRankings() {
-  renderRanking();
+  if (typeof firebase !== 'undefined' && firebase.apps.length) {
+    firebase.database().ref('rankings').get().then(snapshot => {
+      const data = snapshot.val();
+      const list = data ? Object.entries(data).map(([key, val]) => ({ ...val, _key: key })) : [];
+      allRankingsCache = list;
+      renderRankingList(list);
+    });
+  } else {
+    renderRankingList(loadRankings());
+  }
 }
 
 function retryQuiz() {
