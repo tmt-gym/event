@@ -136,10 +136,9 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
 .acc-mc-opt.opt-mine .acc-mc-tag { color:#EF4444; }
 </style>
   <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAnTVYWbu-4KVUzHuvORNfv9s5H-wQjWOE",
       authDomain: "tmt-boxing.firebaseapp.com",
@@ -149,41 +148,39 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
       messagingSenderId: "1097469480470",
       appId: "1:1097469480470:web:6425cfed2a0ab71b00ef37"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const rankingsRef = db.ref('rankings');
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const rankingsRef = ref(db, 'rankings');
-
-    // Firebase → window 브릿지
-    window.fbSaveRanking = async function(entry) {
-      await push(rankingsRef, entry);
+    window.fbSaveRanking = function(entry) {
+      return rankingsRef.push(entry);
     };
 
     window.fbLoadRankings = function(callback) {
-      onValue(rankingsRef, (snapshot) => {
+      rankingsRef.on('value', (snapshot) => {
         const data = snapshot.val();
         const list = data ? Object.entries(data).map(([key, val]) => ({ ...val, _key: key })) : [];
         callback(list);
       });
     };
 
-    window.fbDeleteOne = async function(key) {
-      await remove(ref(db, 'rankings/' + key));
+    window.fbDeleteOne = function(key) {
+      return db.ref('rankings/' + key).remove();
     };
 
-    window.fbDeleteAll = async function() {
-      await remove(rankingsRef);
+    window.fbDeleteAll = function() {
+      return rankingsRef.remove();
     };
 
-    window.fbCheckDuplicate = async function(division, name) {
-      const snapshot = await get(rankingsRef);
-      const data = snapshot.val();
-      if (!data) return false;
-      return Object.values(data).some(r => r.division === division && r.name === name);
+    window.fbCheckDuplicate = function(division, name) {
+      return rankingsRef.get().then(snapshot => {
+        const data = snapshot.val();
+        if (!data) return false;
+        return Object.values(data).some(r => r.division === division && r.name === name);
+      });
     };
 
     window.firebaseReady = true;
-    document.dispatchEvent(new Event('firebaseReady'));
   </script>
 </head>
 <body>
