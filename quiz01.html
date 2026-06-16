@@ -37,7 +37,7 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
 .progress-bar-wrap { height: 8px; background: #D1D5DB; border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
 .progress-bar-fill { height: 100%; background: #EF4444; border-radius: 99px; transition: width .3s; }
 .badge { background: #F3F4F6; border-radius: 99px; padding: 6px 18px; font-size: 14px; font-weight: 700; color: #6B7280; display: inline-block; }
-.question-text { font-size: 22px; font-weight: 700; color: #111827; line-height: 1.6; text-align: center; margin-bottom: 16px; min-height: 106px; display: flex; align-items: center; justify-content: center; }
+.question-text { font-size: 22px; font-weight: 700; color: #111827; line-height: 1.6; text-align: center; margin-bottom: 16px; min-height: 106px; display: flex; align-items: center; justify-content: center; word-break: keep-all; }
 .feedback-text { text-align: center; min-height: 32px; margin-bottom: 4px; font-size: 22px; font-weight: 900; }
 .feedback-correct { color: #22C55E; }
 .feedback-wrong { color: #EF4444; }
@@ -304,10 +304,10 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
 <div id="screen-result" class="screen" style="align-items:center;">
   <div style="font-size:64px; margin-bottom:8px;">🏆</div>
   <div style="font-size:22px; font-weight:900; color:#111827; text-align:center; margin-bottom:4px;">
-    3분 동안<br><span style="color:#EF4444;" id="result-score-text">0개</span>를 맞혔어요!
+    <span id="result-time-text" style="color:#111827;"></span><br>
+    <span id="result-score-text" style="color:#EF4444;"></span><span id="result-suffix-text" style="color:#111827;"></span>
   </div>
-  <div style="font-size:14px; color:#6B7280; margin-bottom:24px;" id="result-total-text">총 0문제 도전</div>
-  <div class="card" style="width:100%; margin-bottom:20px;" id="result-info"></div>
+  <div class="card" style="width:100%; margin-top:24px; margin-bottom:20px;" id="result-info"></div>
   <div id="wrong-note-section" style="width:100%; margin-bottom:20px; display:none;">
     <div class="wrong-note-header">
       <div class="wrong-note-title">오답노트</div>
@@ -633,8 +633,9 @@ function finishQuiz() {
 
 // ── Result ────────────────────────────────────────────────────────────────────
 function renderResult() {
+  document.getElementById('result-time-text').textContent = formatTime(state.elapsed) + ' 만에';
   document.getElementById('result-score-text').textContent = state.score + '개';
-  document.getElementById('result-total-text').textContent = '풀이 시간 ' + formatTime(state.elapsed);
+  document.getElementById('result-suffix-text').textContent = '를 맞혔어요!';
   const rows = [
     ['회원 구분', state.division], ['이름', state.name],
     ['점수', state.score + '점'], ['풀이 시간', formatTime(state.elapsed)]
