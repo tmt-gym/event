@@ -33,12 +33,14 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
 .toggle-btn.active { background: #374151; color: #fff; }
 
 /* ── Quiz screen ── */
-#quiz-card { background: #fff; border-radius: 24px; padding: 28px 20px 24px; box-shadow: 0 4px 24px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+#quiz-card { background: #fff; border-radius: 24px; padding: 28px 20px 20px; box-shadow: 0 4px 24px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+#question-area { min-height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+#answer-area { background: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 4px 24px rgba(0,0,0,.08); margin-top: 12px; }
 .progress-bar-wrap { height: 8px; background: #D1D5DB; border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
 .progress-bar-fill { height: 100%; background: #EF4444; border-radius: 99px; transition: width .3s; }
 .badge { background: #F3F4F6; border-radius: 99px; padding: 6px 18px; font-size: 14px; font-weight: 700; color: #6B7280; display: inline-block; }
-.question-text { font-size: 22px; font-weight: 700; color: #111827; line-height: 1.6; text-align: center; margin-bottom: 16px; min-height: 106px; display: flex; align-items: center; justify-content: center; word-break: keep-all; }
-.feedback-text { text-align: center; min-height: 32px; margin-bottom: 4px; font-size: 22px; font-weight: 900; }
+.question-text { font-size: 22px; font-weight: 700; color: #111827; line-height: 1.6; text-align: center; display: block; word-break: keep-all; }
+.feedback-text { text-align: center; height: 32px; margin-bottom: 8px; font-size: 20px; font-weight: 900; overflow: hidden; }
 .feedback-correct { color: #22C55E; }
 .feedback-wrong { color: #EF4444; }
 .divider { height: 1px; background: #F3F4F6; margin-bottom: 20px; }
@@ -134,6 +136,27 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
 .acc-mc-tag { margin-left:auto; font-size:10px; font-weight:800; }
 .acc-mc-opt.opt-correct .acc-mc-tag { color:#15803D; }
 .acc-mc-opt.opt-mine .acc-mc-tag { color:#EF4444; }
+
+/* ── 소형 화면 대응 ── */
+@media (max-height: 667px) {
+  .screen { padding: 16px 16px; }
+  #quiz-card { padding: 20px 16px 16px; }
+  .question-text { font-size: 18px; margin-bottom: 10px; }
+  .feedback-text { font-size: 17px; height: 28px; margin-bottom: 6px; }
+  .ox-btn { padding: 14px 0; }
+  .ox-btn svg { width: 40px; height: 40px; }
+  .mc-btn { padding: 10px 14px; }
+  .mc-text { font-size: 14px; }
+  .progress-bar-wrap { margin-bottom: 14px; }
+  .badge { padding: 4px 14px; font-size: 13px; }
+}
+@media (max-width: 360px) {
+  .question-text { font-size: 18px; }
+  .toggle-btn { font-size: 14px; padding: 12px 0; }
+  .ox-btn svg { width: 40px; height: 40px; }
+  .mc-text { font-size: 14px; }
+  .timer-num, .score-num, .counter-num { font-size: 18px; }
+}
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -294,10 +317,12 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
     <div style="display:flex; justify-content:center; margin-bottom:16px;">
       <span class="badge" id="quiz-badge">퀴즈 1</span>
     </div>
-    <div class="question-text" id="question-text"></div>
+    <div id="question-area">
+      <div class="question-text" id="question-text"></div>
+    </div>
     <div class="feedback-text" id="feedback-text"></div>
   </div>
-  <div id="answer-area" style="margin-top:16px;"></div>
+  <div id="answer-area"></div>
 </div>
 
 <!-- ── RESULT SCREEN ── -->
