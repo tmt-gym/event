@@ -213,8 +213,7 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
       <div style="font-size:15px; font-weight:700; color:#374151; margin-bottom:8px;">회원 구분</div>
       <div class="toggle-group" id="division-group">
         <button class="toggle-btn" onclick="selectToggle('division','초등부',this)">초등부</button>
-        <button class="toggle-btn" onclick="selectToggle('division','중등부',this)">중등부</button>
-        <button class="toggle-btn" onclick="selectToggle('division','고등부',this)">고등부</button>
+        <button class="toggle-btn" onclick="selectToggle('division','중·고등부',this)">중·고등부</button>
         <button class="toggle-btn" onclick="selectToggle('division','성인부',this)">성인부</button>
       </div>
     </div>
@@ -348,10 +347,9 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
   </div>
   <div class="rank-tabs">
     <button class="rank-tab active" onclick="selectRankTab('전체', this)">전체</button>
-    <button class="rank-tab" onclick="selectRankTab('성인부', this)">성인부</button>
     <button class="rank-tab" onclick="selectRankTab('초등부', this)">초등부</button>
-    <button class="rank-tab" onclick="selectRankTab('중등부', this)">중등부</button>
-    <button class="rank-tab" onclick="selectRankTab('고등부', this)">고등부</button>
+    <button class="rank-tab" onclick="selectRankTab('중·고등부', this)">중·고등부</button>
+    <button class="rank-tab" onclick="selectRankTab('성인부', this)">성인부</button>
   </div>
   <div id="ranking-list"></div>
   <button class="btn-secondary" style="margin-top:20px;" onclick="showScreen('start')">홈으로</button>
