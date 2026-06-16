@@ -478,10 +478,14 @@ function startQuiz() {
   state.name = name;
 
   // Check duplicate
-  if (window.fbCheckDuplicate) {
-    window.fbCheckDuplicate(state.division, state.name).then(dup => {
+  if (typeof firebase !== 'undefined' && firebase.apps.length) {
+    firebase.database().ref('rankings').get().then(snapshot => {
+      const data = snapshot.val();
+      const dup = data ? Object.values(data).some(r => r.division === state.division && r.name === state.name) : false;
       if (dup) { document.getElementById('modal-dup').classList.add('active'); }
       else { document.getElementById('modal-guide').classList.add('active'); }
+    }).catch(() => {
+      document.getElementById('modal-guide').classList.add('active');
     });
   } else {
     const existing = loadRankings();
@@ -603,14 +607,27 @@ function finishQuiz() {
   state.done = true;
   clearInterval(state.timerID);
   state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-  // Save ranking
-  const entry = { division: state.division, name: state.name, score: state.score, totalAnswered: state.answered, elapsed: state.elapsed, createdAt: new Date().toISOString() };
-  if (window.fbSaveRanking) {
-    window.fbSaveRanking(entry).then(() => { renderResult(); showScreen('result'); });
+
+  const entry = {
+    division: state.division,
+    name: state.name,
+    score: state.score,
+    totalAnswered: state.answered,
+    elapsed: state.elapsed,
+    createdAt: new Date().toISOString()
+  };
+
+  // 결과 화면 먼저 표시
+  renderResult();
+  showScreen('result');
+
+  // Firebase에 저장 (비동기, 화면 전환과 무관)
+  if (typeof firebase !== 'undefined' && firebase.apps.length) {
+    firebase.database().ref('rankings').push(entry)
+      .then(() => console.log('저장 완료'))
+      .catch(e => console.error('저장 실패:', e));
   } else {
     saveRankings([...loadRankings(), entry]);
-    renderResult();
-    showScreen('result');
   }
 }
 
