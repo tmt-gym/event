@@ -688,17 +688,19 @@ function toggleAcc(i) {
 
 // ── Ranking ───────────────────────────────────────────────────────────────────
 let currentRankTab = '전체';
+let allRankingsCache = [];
 
 function selectRankTab(tab, el) {
   currentRankTab = tab;
   document.querySelectorAll('.rank-tab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  renderRanking();
+  renderRankingList(allRankingsCache);
 }
 
 function renderRankingList(all) {
+  allRankingsCache = all;
   const filtered = currentRankTab === '전체' ? all : all.filter(r => r.division === currentRankTab);
-  const list = filtered.sort((a,b) => {
+  const list = [...filtered].sort((a,b) => {
     if (b.score!==a.score) return b.score-a.score;
     return new Date(a.createdAt)-new Date(b.createdAt);
   });
@@ -728,17 +730,26 @@ function renderRankingList(all) {
   }).join('');
 }
 
+let rankingSubscribed = false;
 function renderRanking() {
-  if (window.fbLoadRankings) {
-    window.fbLoadRankings((list) => renderRankingList(list));
+  if (window.firebaseReady) {
+    if (!rankingSubscribed) {
+      rankingSubscribed = true;
+      firebase.database().ref('rankings').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const list = data ? Object.entries(data).map(([key, val]) => ({ ...val, _key: key })) : [];
+        renderRankingList(list);
+      });
+    } else {
+      renderRankingList(allRankingsCache);
+    }
   } else {
     renderRankingList(loadRankings());
   }
 }
 
 function resetRankings() {
-  if (window.fbLoadRankings) { renderRanking(); }
-  else { renderRanking(); }
+  renderRanking();
 }
 
 function retryQuiz() {
@@ -774,7 +785,7 @@ function renderAdminRecords() {
   container.innerHTML = '<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px 0;">불러오는 중...</div>';
 
   const doRender = (list) => {
-    const sorted = list.sort((a,b) => {
+    const sorted = [...list].sort((a,b) => {
       if (b.score!==a.score) return b.score-a.score;
       return new Date(a.createdAt)-new Date(b.createdAt);
     });
@@ -794,8 +805,15 @@ function renderAdminRecords() {
       </div>`).join('');
   };
 
-  if (window.fbLoadRankings) {
-    window.fbLoadRankings(doRender);
+  if (window.firebaseReady) {
+    // Firebase에서 직접 1회 읽기
+    firebase.database().ref('rankings').get().then(snapshot => {
+      const data = snapshot.val();
+      const list = data ? Object.entries(data).map(([key, val]) => ({ ...val, _key: key })) : [];
+      doRender(list);
+    });
+  } else if (allRankingsCache.length) {
+    doRender(allRankingsCache);
   } else {
     doRender(loadRankings());
   }
