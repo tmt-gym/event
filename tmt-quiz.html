@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TMT OX 퀴즈</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+body { background: #F1F5F9; display: flex; justify-content: center; min-height: 100vh; }
+#app { width: 100%; max-width: 430px; background: #F1F5F9; min-height: 100vh; position: relative; }
+
+/* ── Screens ── */
+.screen { display: none; padding: 28px 20px; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ── Buttons ── */
+.btn-primary { width: 100%; padding: 18px 0; border-radius: 16px; border: none; background: #EF4444; color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 16px rgba(239,68,68,.35); }
+.btn-secondary { width: 100%; padding: 16px 0; border-radius: 16px; border: 2px solid #E5E7EB; background: #fff; color: #374151; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* ── Cards ── */
+.card { background: #fff; border-radius: 24px; padding: 24px 20px; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+
+/* ── Modal overlay ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 0 24px; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: #fff; border-radius: 24px; padding: 28px 24px 24px; width: 100%; max-width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,.18); }
+
+/* ── Toggle buttons ── */
+.toggle-group { display: flex; gap: 10px; }
+.toggle-btn { flex: 1; padding: 14px 0; border-radius: 14px; border: none; cursor: pointer; font-weight: 700; font-size: 16px; background: #F3F4F6; color: #9CA3AF; transition: all .15s; }
+.toggle-btn.active { background: #374151; color: #fff; }
+
+/* ── Quiz screen ── */
+#quiz-card { background: #fff; border-radius: 24px; padding: 28px 20px 24px; box-shadow: 0 4px 24px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+.progress-bar-wrap { height: 8px; background: #D1D5DB; border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+.progress-bar-fill { height: 100%; background: #EF4444; border-radius: 99px; transition: width .3s; }
+.badge { background: #F3F4F6; border-radius: 99px; padding: 6px 18px; font-size: 14px; font-weight: 700; color: #6B7280; display: inline-block; }
+.question-text { font-size: 22px; font-weight: 700; color: #111827; line-height: 1.6; text-align: center; margin-bottom: 16px; min-height: 106px; display: flex; align-items: center; justify-content: center; }
+.feedback-text { text-align: center; min-height: 32px; margin-bottom: 4px; font-size: 22px; font-weight: 900; }
+.feedback-correct { color: #22C55E; }
+.feedback-wrong { color: #EF4444; }
+.divider { height: 1px; background: #F3F4F6; margin-bottom: 20px; }
+
+/* ── OX Buttons ── */
+.ox-wrap { display: flex; gap: 14px; }
+.ox-btn { flex: 1; padding: 22px 0; border-radius: 18px; border: 2.5px solid #E5E7EB; background: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; transition: opacity .1s; }
+.ox-btn.o-btn { border-color: #DBEAFE; background: #EFF6FF; }
+.ox-btn.x-btn { border-color: #FEE2E2; background: #FFF1F2; }
+.ox-btn.disabled { opacity: .7; cursor: default; }
+.ox-btn svg { pointer-events: none; }
+
+/* ── MC Buttons ── */
+.mc-wrap { display: flex; flex-direction: column; gap: 10px; }
+.mc-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; border: 2px solid #E5E7EB; background: #F9FAFB; cursor: pointer; text-align: left; transition: all .15s; }
+.mc-btn.disabled { cursor: default; }
+.mc-btn.correct { background: #F0FDF4; border-color: #86EFAC; }
+.mc-btn.wrong-pick { background: #FFF1F2; border-color: #FECACA; }
+.mc-label { min-width: 28px; height: 28px; border-radius: 8px; background: #E5E7EB; color: #6B7280; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; }
+.mc-btn.correct .mc-label { background: #22C55E; color: #fff; }
+.mc-btn.wrong-pick .mc-label { background: #EF4444; color: #fff; }
+.mc-text { font-size: 16px; font-weight: 600; color: #111827; line-height: 1.4; }
+.mc-btn.correct .mc-text { color: #15803D; }
+.mc-btn.wrong-pick .mc-text { color: #991B1B; }
+.mc-tag { margin-left: auto; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.mc-btn.correct .mc-tag { color: #15803D; }
+.mc-btn.wrong-pick .mc-tag { color: #EF4444; }
+
+/* ── Timer ── */
+.timer-wrap { display: flex; align-items: center; gap: 6px; }
+.timer-num { font-weight: 800; font-size: 22px; color: #111827; }
+.timer-unit { font-size: 13px; font-weight: 600; color: #6B7280; }
+.score-num { font-size: 22px; font-weight: 800; color: #EF4444; }
+.score-unit { font-size: 13px; font-weight: 600; color: #EF4444; }
+.counter-num { font-size: 22px; font-weight: 800; color: #9CA3AF; }
+
+
+/* ── Ranking tabs ── */
+.rank-tabs { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; }
+.rank-tabs::-webkit-scrollbar { display:none; }
+.rank-tab { flex-shrink:0; padding:8px 16px; border-radius:99px; border:1.5px solid #E5E7EB; background:#fff; font-size:13px; font-weight:700; color:#9CA3AF; cursor:pointer; white-space:nowrap; transition:all .15s; }
+.rank-tab.active { background:#EF4444; border-color:#EF4444; color:#fff; }
+/* ── Ranking ── */
+.rank-item { background: #fff; border-radius: 18px; padding: 16px 18px; border: 2px solid #F3F4F6; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); margin-bottom: 10px; }
+.rank-item.top1 { background: #FFFBEB; border-color: #FCD34D; box-shadow: 0 4px 20px rgba(0,0,0,.10); }
+.rank-item.top2 { background: #F8FAFC; border-color: #CBD5E1; box-shadow: 0 4px 20px rgba(0,0,0,.10); }
+.rank-item.top3 { background: #FFF7ED; border-color: #FED7AA; box-shadow: 0 4px 20px rgba(0,0,0,.10); }
+
+/* ── Accordion ── */
+@keyframes slideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.wrong-note-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.wrong-note-title { font-size:16px; font-weight:900; color:#111827; }
+.wrong-count-pill { background:#FEE2E2; color:#EF4444; font-size:12px; font-weight:700; border-radius:99px; padding:3px 12px; }
+.acc-item { background:#fff; border-radius:18px; border:1.5px solid #F3F4F6; overflow:hidden; margin-bottom:10px; box-shadow:0 2px 10px rgba(0,0,0,.05); transition:border-color .2s; }
+.acc-item.open { border-color:#FCA5A5; }
+.acc-header { width:100%; padding:16px; display:flex; align-items:center; gap:12px; background:none; border:none; cursor:pointer; text-align:left; }
+.acc-num { min-width:28px; height:28px; border-radius:99px; background:#FEE2E2; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#EF4444; flex-shrink:0; }
+.acc-preview { flex:1; min-width:0; }
+.acc-preview-q { font-size:13px; font-weight:600; color:#374151; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; line-height:1.5; }
+.acc-preview-ans { font-size:11px; color:#9CA3AF; margin-top:3px; display:flex; align-items:center; gap:4px; }
+.acc-preview-ans .my-ans { color:#EF4444; font-weight:700; }
+.acc-preview-ans .right-ans { color:#22C55E; font-weight:700; }
+.acc-chevron { flex-shrink:0; transition:transform .25s cubic-bezier(.4,0,.2,1); color:#CBD5E1; }
+.acc-item.open .acc-chevron { transform:rotate(180deg); }
+.acc-body { display:none; border-top:1px solid #FEF2F2; }
+.acc-body.open { display:block; animation:slideDown .2s ease; }
+.acc-section { padding:14px 16px; border-bottom:1px solid #FEF2F2; }
+.acc-section:last-child { border-bottom:none; }
+.acc-section-label { font-size:10px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; margin-bottom:8px; }
+.acc-section-label.q-label { color:#6B7280; }
+.acc-section-label.ans-label { color:#16A34A; }
+.acc-section-label.exp-label { color:#2563EB; }
+.acc-section-label.my-label { color:#EF4444; }
+.acc-q-text { font-size:14px; font-weight:600; color:#111827; line-height:1.65; }
+.acc-answer-row { display:flex; align-items:center; gap:10px; }
+.acc-answer-badge { display:inline-flex; align-items:center; justify-content:center; min-width:32px; height:32px; border-radius:99px; font-size:15px; font-weight:900; flex-shrink:0; }
+.acc-answer-badge.correct-badge { background:#DCFCE7; color:#15803D; }
+.acc-answer-badge.wrong-badge { background:#FEE2E2; color:#DC2626; }
+.acc-answer-text { font-size:14px; font-weight:700; }
+.acc-answer-text.correct-text { color:#15803D; }
+.acc-answer-text.wrong-text { color:#DC2626; }
+.acc-explanation { font-size:14px; color:#374151; line-height:1.7; background:#EFF6FF; border-radius:12px; padding:12px 14px; border-left:3px solid #3B82F6; }
+.acc-mc-opts { display:flex; flex-direction:column; gap:6px; margin-top:4px; }
+.acc-mc-opt { display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:10px; border:1.5px solid #E5E7EB; background:#F9FAFB; }
+.acc-mc-opt.opt-correct { background:#F0FDF4; border-color:#86EFAC; }
+.acc-mc-opt.opt-mine { background:#FFF1F2; border-color:#FECACA; }
+.acc-mc-lbl { min-width:22px; height:22px; border-radius:6px; background:#E5E7EB; color:#9CA3AF; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; }
+.acc-mc-opt.opt-correct .acc-mc-lbl { background:#22C55E; color:#fff; }
+.acc-mc-opt.opt-mine .acc-mc-lbl { background:#EF4444; color:#fff; }
+.acc-mc-opttext { font-size:13px; font-weight:600; color:#6B7280; }
+.acc-mc-opt.opt-correct .acc-mc-opttext { color:#15803D; }
+.acc-mc-opt.opt-mine .acc-mc-opttext { color:#991B1B; }
+.acc-mc-tag { margin-left:auto; font-size:10px; font-weight:800; }
+.acc-mc-opt.opt-correct .acc-mc-tag { color:#15803D; }
+.acc-mc-opt.opt-mine .acc-mc-tag { color:#EF4444; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── START SCREEN ── -->
+<div id="screen-start" class="screen active">
+  <div style="text-align:center; margin-bottom:28px;">
+    <img src="https://raw.githubusercontent.com/tmt-boxing/ranking/main/tmt.png" style="width:120px; height:120px; object-fit:contain; margin-bottom:4px;">
+    <div style="font-size:30px; font-weight:900; color:#EF4444; letter-spacing:-.5px; line-height:1.3; margin-bottom:8px;">복싱 퀴즈 챔피언에<br>도전하세요!</div>
+    <div style="font-size:16px; color:#4B5563; line-height:1.6;">총 20문제, 제한시간 3분!<br>퀴즈를 가장 많이, 빠르게 맞힌 사람이<br>TMT 복싱왕이 됩니다.</div>
+  </div>
+
+  <div class="card">
+    <div style="margin-bottom:18px;">
+      <div style="font-size:15px; font-weight:700; color:#374151; margin-bottom:8px;">회원 구분</div>
+      <div class="toggle-group" id="division-group">
+        <button class="toggle-btn" onclick="selectToggle('division','초등부',this)">초등부</button>
+        <button class="toggle-btn" onclick="selectToggle('division','중등부',this)">중등부</button>
+        <button class="toggle-btn" onclick="selectToggle('division','고등부',this)">고등부</button>
+        <button class="toggle-btn" onclick="selectToggle('division','성인부',this)">성인부</button>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:15px; font-weight:700; color:#374151; margin-bottom:8px;">이름</div>
+      <input id="name-input" type="text" placeholder="이름을 입력하세요"
+        style="width:100%; padding:14px 16px; border-radius:14px; border:2px solid #F3F4F6; font-size:16px; outline:none; background:#F9FAFB; color:#111827; font-family:inherit;"
+        onkeydown="if(event.key==='Enter') startQuiz()">
+    </div>
+    <div id="start-error" style="display:none; margin-top:12px; color:#EF4444; font-size:13px; font-weight:600; text-align:center;">
+      회원 구분, 성별, 이름을 모두 입력해 주세요.
+    </div>
+  </div>
+
+  <div style="margin-top:20px; display:flex; flex-direction:column; gap:12px;">
+    <button class="btn-primary" onclick="startQuiz()">시작하기</button>
+    <button class="btn-secondary" onclick="showScreen('ranking')">랭킹 보기</button>
+  </div>
+</div>
+
+<!-- ── GUIDE MODAL ── -->
+<div id="modal-guide" class="modal-overlay">
+  <div class="modal-box">
+    <div style="font-size:20px; font-weight:900; color:#111827; text-align:left; margin-bottom:20px;">안내사항</div>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:28px;">
+
+      <!-- 제한시간 -->
+      <div style="background:#F9FAFB; border-radius:14px; padding:14px 16px; border:1.5px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; color:#6B7280; font-weight:600;">제한시간</span>
+        <span style="font-size:15px; font-weight:800; color:#111827;">3분</span>
+      </div>
+
+      <!-- 도전 횟수 -->
+      <div style="background:#F9FAFB; border-radius:14px; padding:14px 16px; border:1.5px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; color:#6B7280; font-weight:600;">도전 횟수</span>
+        <span style="font-size:15px; font-weight:800; color:#111827;">1인 1회</span>
+      </div>
+
+      <!-- 문제 구성 -->
+      <div style="background:#F9FAFB; border-radius:14px; padding:14px 16px; border:1.5px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; color:#6B7280; font-weight:600;">문제 구성</span>
+        <span style="font-size:15px; font-weight:800; color:#111827;">OX 10개 · 객관식 10개</span>
+      </div>
+
+      <!-- 순위 산정 기준 -->
+      <div style="background:#F9FAFB; border-radius:14px; padding:14px 16px; border:1.5px solid #E5E7EB;">
+        <div style="font-size:14px; color:#6B7280; font-weight:600; margin-bottom:10px;">순위 산정 기준</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; align-items:flex-start; gap:8px;">
+            <span style="min-width:18px; height:18px; border-radius:99px; background:#EF4444; color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">1</span>
+            <span style="font-size:15px; color:#374151; font-weight:500; line-height:1.5;">정답을 많이 맞힌 사람이 높은 순위에 올라갑니다.</span>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:8px;">
+            <span style="min-width:18px; height:18px; border-radius:99px; background:#EF4444; color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">2</span>
+            <span style="font-size:15px; color:#374151; font-weight:500; line-height:1.5;">정답 수가 같으면 더 빨리 제출한 사람이 앞 순위가 됩니다.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-secondary" style="flex:1; padding:15px 0;" onclick="closeModal('modal-guide')">취소</button>
+      <button class="btn-primary" style="flex:2; padding:15px 0;" onclick="confirmStart()">도전 시작!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DUPLICATE MODAL ── -->
+<div id="modal-dup" class="modal-overlay">
+  <div class="modal-box" style="text-align:center;">
+    <div style="font-size:52px; margin-bottom:14px;">🚫</div>
+    <div style="font-size:20px; font-weight:900; color:#111827; margin-bottom:10px;">이미 참여하셨습니다.</div>
+    <div style="font-size:14px; color:#6B7280; line-height:1.6; margin-bottom:28px;">동일한 회원 구분·성별·이름으로<br>이미 퀴즈에 참여하셨어요.<br>1인 1회만 참여 가능합니다.</div>
+    <button class="btn-primary" onclick="closeModal('modal-dup')">확인</button>
+  </div>
+</div>
+
+<!-- ── QUIZ SCREEN ── -->
+<div id="screen-quiz" class="screen">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+    <div class="timer-wrap">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="timer-num" id="timer-num">03:00</span>
+    </div>
+    <div><span class="score-num" id="score-num">0</span><span class="score-unit">점</span></div>
+    <div class="counter-num" id="counter-num">1/20</div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  <div id="quiz-card">
+    <div style="display:flex; justify-content:center; margin-bottom:16px;">
+      <span class="badge" id="quiz-badge">퀴즈 1</span>
+    </div>
+    <div class="question-text" id="question-text"></div>
+    <div class="feedback-text" id="feedback-text"></div>
+  </div>
+  <div id="answer-area" style="margin-top:16px;"></div>
+</div>
+
+<!-- ── RESULT SCREEN ── -->
+<div id="screen-result" class="screen" style="align-items:center;">
+  <div style="font-size:64px; margin-bottom:8px;">🏆</div>
+  <div style="font-size:22px; font-weight:900; color:#111827; text-align:center; margin-bottom:4px;">
+    3분 동안<br><span style="color:#EF4444;" id="result-score-text">0개</span>를 맞혔어요!
+  </div>
+  <div style="font-size:14px; color:#6B7280; margin-bottom:24px;" id="result-total-text">총 0문제 도전</div>
+  <div class="card" style="width:100%; margin-bottom:20px;" id="result-info"></div>
+  <div id="wrong-note-section" style="width:100%; margin-bottom:20px; display:none;">
+    <div class="wrong-note-header">
+      <div class="wrong-note-title">오답노트</div>
+      <div class="wrong-count-pill"></div>
+    </div>
+    <div id="wrong-list"></div>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
+    <button class="btn-primary" onclick="showScreen('ranking')">랭킹 보기</button>
+  </div>
+</div>
+
+<!-- ── RANKING SCREEN ── -->
+<div id="screen-ranking" class="screen">
+  <div style="display:flex; align-items:center; margin-bottom:16px;">
+    <button onclick="showScreen('start')" style="background:none; border:none; font-size:24px; cursor:pointer; margin-right:8px; color:#374151;">←</button>
+    <div style="font-size:22px; font-weight:900; color:#111827; flex:1;">🏆 랭킹</div>
+    <div style="display:flex; gap:8px;">
+      <button onclick="resetRankings()" style="background:#E2E8F0; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:700; color:#374151; cursor:pointer;">새로고침</button>
+      <button onclick="openAdminModal()" style="background:#E2E8F0; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:700; color:#374151; cursor:pointer;">관리자</button>
+    </div>
+  </div>
+  <div class="rank-tabs">
+    <button class="rank-tab active" onclick="selectRankTab('전체', this)">전체</button>
+    <button class="rank-tab" onclick="selectRankTab('성인부', this)">성인부</button>
+    <button class="rank-tab" onclick="selectRankTab('초등부', this)">초등부</button>
+    <button class="rank-tab" onclick="selectRankTab('중등부', this)">중등부</button>
+    <button class="rank-tab" onclick="selectRankTab('고등부', this)">고등부</button>
+  </div>
+  <div id="ranking-list"></div>
+  <button class="btn-secondary" style="margin-top:20px;" onclick="showScreen('start')">홈으로</button>
+</div>
+
+
+<!-- ── ADMIN MODAL ── -->
+<div id="modal-admin" class="modal-overlay">
+  <div class="modal-box">
+    <div style="font-size:18px; font-weight:900; color:#111827; margin-bottom:6px;">관리자 인증</div>
+    <div style="font-size:13px; color:#9CA3AF; margin-bottom:20px;">비밀번호를 입력하세요.</div>
+    <input id="admin-pw-input" type="password" placeholder="비밀번호"
+      style="width:100%; padding:14px 16px; border-radius:14px; border:2px solid #E5E7EB; font-size:15px; outline:none; background:#F9FAFB; color:#111827; font-family:inherit; box-sizing:border-box; margin-bottom:8px;"
+      onkeydown="if(event.key==='Enter') confirmAdmin()">
+    <div id="admin-pw-error" style="display:none; color:#EF4444; font-size:13px; font-weight:600; margin-bottom:12px;">비밀번호가 올바르지 않습니다.</div>
+    <div style="display:flex; gap:10px; margin-top:12px;">
+      <button class="btn-secondary" style="flex:1; padding:14px 0;" onclick="closeModal('modal-admin'); document.getElementById('admin-pw-input').value=''; document.getElementById('admin-pw-error').style.display='none';">취소</button>
+      <button class="btn-primary" style="flex:2; padding:14px 0;" onclick="confirmAdmin()">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADMIN PANEL MODAL ── -->
+<div id="modal-admin-panel" class="modal-overlay">
+  <div class="modal-box" style="max-height:85vh; overflow-y:auto;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+      <div style="font-size:18px; font-weight:900; color:#111827;">관리자 메뉴</div>
+      <button onclick="closeModal('modal-admin-panel')" style="background:none; border:none; font-size:22px; cursor:pointer; color:#9CA3AF; line-height:1;">×</button>
+    </div>
+    <div style="font-size:13px; color:#9CA3AF; margin-bottom:20px;">랭킹 데이터를 관리합니다.</div>
+
+    <!-- 개별 기록 삭제 -->
+    <div style="font-size:13px; font-weight:700; color:#374151; margin-bottom:10px;">개별 기록 삭제</div>
+    <div id="admin-record-list" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px; max-height:300px; overflow-y:auto;"></div>
+
+    <!-- 전체 삭제 -->
+    <div style="height:1px; background:#F3F4F6; margin-bottom:16px;"></div>
+    <button onclick="adminDeleteAll()" style="width:100%; padding:16px; border-radius:14px; border:2px solid #FECACA; background:#FFF1F2; color:#DC2626; font-size:15px; font-weight:800; cursor:pointer;">
+      전체 기록 삭제
+    </button>
+  </div>
+</div>
+</div><!-- #app -->
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+function formatTime(sec) { const m = Math.floor(sec/60), s = sec%60; return m>0 ? m+'분 '+s+'초' : s+'초'; }
+
+const QUESTIONS = [
+  { type:"ox", q:"앞손으로 빠르고 가볍게 치는 펀치를 '잽'이라고 한다.", a:true,
+    exp:"잽(Jab)은 앞손(리드 핸드)을 이용해 빠르고 가볍게 직선으로 뻗는 펀치입니다. 복싱의 가장 기본적인 공격이자 거리 조절과 리듬을 만드는 핵심 기술입니다." },
+  { type:"ox", q:"워킹 스텝은 뛰듯이 움직이며 빠르게 거리를 조절하는 방식이다.", a:false,
+    exp:"워킹 스텝은 발을 걷듯이 이동하는 안정적인 풋워크입니다. 뛰듯이 움직이는 것은 '스킵 스텝(Skip Step)'으로, 두 동작은 서로 다른 이동 방식입니다." },
+  { type:"ox", q:"'잽-잽'처럼 연속으로 두 번 빠르게 뻗는 기술을 '더블 잽'이라고 한다.", a:true,
+    exp:"더블 잽은 앞손으로 같은 방향의 잽을 연속 두 번 빠르게 던지는 기술로, 상대의 리듬을 흐트러뜨리고 빈틈을 만들 때 효과적입니다." },
+  { type:"ox", q:"주먹을 아래에서 위로 올려치는 펀치를 '훅'이라고 한다.", a:false,
+    exp:"아래에서 위로 올려치는 기술은 '어퍼컷(Uppercut)'입니다. 훅(Hook)은 팔꿈치를 90도로 구부려 옆에서 호를 그리며 치는 펀치입니다." },
+  { type:"ox", q:"상대의 펀치를 피하기 위해 무릎을 살짝 굽히고 몸을 아래로 낮추는 동작을 '더킹'이라고 한다.", a:true,
+    exp:"덕킹(Ducking)은 무릎을 굽혀 몸 전체를 순간적으로 낮추는 방어 기술입니다. 상대의 펀치를 피하는 동시에 카운터 공격 기회를 만들 수 있습니다." },
+  { type:"ox", q:"복싱 경기에서 상대의 등이나 뒤통수를 때리면 좋은 점수를 받을 수 있다.", a:false,
+    exp:"등이나 뒤통수 타격은 반칙(파울)입니다. 복싱의 유효 타격 부위는 상대의 얼굴 정면과 몸통 앞쪽입니다. 반칙 시 경고 또는 감점 처리됩니다." },
+  { type:"ox", q:"경기가 끝난 뒤 두 선수가 서로 껴안거나 악수를 나누며 격려하는 행동은 복싱에서 중요한 스포츠 매너이다.", a:true,
+    exp:"경기 후 상호 인사는 복싱의 중요한 스포츠맨십입니다. 치열한 경쟁 후에도 상대를 존중하는 문화는 복싱이 단순한 격투가 아닌 스포츠임을 보여줍니다." },
+  { type:"ox", q:"지도자가 들고 있는 미트를 치며 정확도와 타이밍을 연습하는 훈련을 '미트 트레이닝'이라고 한다.", a:true,
+    exp:"미트 트레이닝(Mitt Training)은 트레이너가 미트(패드)를 들고 선수의 타격 정확도, 타이밍, 콤비네이션을 함께 훈련하는 방법입니다. 실전 감각을 기르는 핵심 훈련입니다." },
+  { type:"ox", q:"상대와 거리를 두고 잽이나 스트레이트로 공격하는 스타일을 '아웃복싱'이라고 한다.", a:true,
+    exp:"아웃복싱(Outboxing)은 거리를 유지하며 빠른 발과 긴 리치로 공격하는 전술입니다. 무하마드 알리가 대표적인 아웃복서로, 근접전을 피하며 포인트를 쌓는 스타일입니다." },
+  { type:"ox", q:"상대의 펀치를 피하기 위해 상체를 U자 모양으로 움직이는 동작을 '위빙'이라고 한다.", a:true,
+    exp:"위빙(Weaving)은 상체를 U자 형태로 움직여 상대의 펀치를 흘려내는 방어 기술입니다. 단순히 피하는 데 그치지 않고 반격 자세까지 연결할 수 있어 공수 겸용 기술입니다." },
+  { type:"mc", q:"잽을 친 뒤 바로 스트레이트를 연결하는 기본 연속 공격은 무엇인가요?", options:["원훅","잽잽","원투","컴비네이션"], a:2,
+    exp:"원투(1-2)는 잽(1)에 이어 스트레이트(2)를 연결하는 복싱의 가장 기본 콤비네이션입니다. 잽으로 거리를 재고 상대를 흔든 뒤 강력한 뒷손 스트레이트로 마무리하는 공격입니다." },
+  { type:"mc", q:"민첩한 발의 움직임을 기르고, 체력과 지구력을 기르기 위해 많이 하는 기본 운동은 무엇인가요?", options:["점프스쿼트","팔벌려 뛰기","팔굽혀펴기","줄넘기"], a:3,
+    exp:"줄넘기는 복싱 훈련의 필수 요소입니다. 발의 리듬감과 민첩성을 기르고 심폐 지구력을 높이는 데 효과적이며, 실제 복싱의 풋워크 패턴과 매우 유사합니다." },
+  { type:"mc", q:"글러브를 끼기 전에 손목과 주먹을 보호하기 위해 손에 감는 것의 이름은 무엇인가요?", options:["마우스피스","핸드랩 / 붕대","글러브 밴드","테이핑"], a:1,
+    exp:"핸드랩(Hand Wrap) 또는 붕대는 손가락 뼈, 손목 관절을 고정하고 충격을 분산시켜 부상을 예방합니다. 글러브 착용 전 반드시 감아야 하는 필수 보호 장비입니다." },
+  { type:"mc", q:"경기나 훈련 중 치아와 입 안을 보호하기 위해 입에 무는 보호장비는 무엇인가요?", options:["마우스피스","헤드기어","낭심 보호대","가드"], a:0,
+    exp:"마우스피스(Mouthpiece)는 입 안에 물고 경기하는 보호 장구로, 치아 손상 방지와 함께 턱에 가해지는 충격을 완화해 뇌진탕 위험을 줄여줍니다." },
+  { type:"mc", q:"상대의 공격을 피하지 않고, 팔이나 글러브로 막는 방어 기술은 무엇인가요?", options:["위빙","블로킹","슬립","스웨이"], a:1,
+    exp:"블로킹(Blocking)은 글러브나 팔을 이용해 상대 펀치를 직접 막는 방어 기술입니다. 충격을 완전히 차단하거나 흡수하여 피해를 최소화합니다." },
+  { type:"mc", q:"상대의 펀치를 손으로 살짝 쳐내어 방향을 바꾸는 방어 기술은 무엇인가요?", options:["패링","캐칭","블로킹","위빙"], a:0,
+    exp:"패링(Parrying)은 손바닥으로 상대 펀치를 살짝 쳐내어 궤도를 바꾸는 기술입니다. 직접 막는 블로킹과 달리 힘을 흘려 받아 에너지 소모를 줄이고 반격 기회를 만듭니다." },
+  { type:"mc", q:"상대에게 가까이 붙어 압박하며 싸우는 스타일의 선수는 무엇이라고 하나요?", options:["아웃복서","인파이터","슬러거","카운터 펀처"], a:1,
+    exp:"인파이터(In-fighter)는 상대에게 가까이 붙어 짧은 거리에서 빠른 연타로 공격하는 스타일입니다. 마이크 타이슨이 대표적인 인파이터로, 근접전에서 강력한 훅과 어퍼컷을 구사합니다." },
+  { type:"mc", q:"양손을 얼굴 앞에 바짝 모아 방어하는 가드하는 동작으로, 마이크 타이슨의 대표적인 가드 스타일은 무엇인가요?", options:["사우스포 가드","숄더 롤","피카부 가드","원투 가드"], a:2,
+    exp:"피카부 가드(Peek-a-boo Guard)는 양손을 얼굴 앞에 바짝 붙여 방어하는 자세입니다. 커스 다마토 트레이너가 개발하고 마이크 타이슨이 완성한 스타일로, 빠른 이동과 폭발적인 근접 공격이 특징입니다." },
+  { type:"mc", q:"빠른 발과 긴 리치를 활용한 복싱 스타일로 유명한 무하마드 알리가 남긴 명언은 무엇인가요?", options:["포기하지 마라, 고통은 잠깐이다.","나비처럼 날아서 벌처럼 쏜다.","누구나 계획은 있다. 맞기 전까지는.","끝날 때까지 끝난 게 아니다."], a:1,
+    exp:"'나비처럼 날아서 벌처럼 쏜다(Float like a butterfly, sting like a bee)'는 알리의 복싱 스타일 그 자체를 표현한 명언입니다. 가볍고 빠른 풋워크로 피하고, 순간적으로 강력한 펀치를 꽂는 그의 철학을 담고 있습니다." },
+  { type:"mc", q:"'누구나 그럴싸한 계획을 갖고 있다, 쳐맞기 전까지는.'이라는 전설적인 명언을 남긴 복서는 누구인가요?", options:["무하마드 알리","매니 파퀴아오","플로이드 메이웨더","마이크 타이슨"], a:3,
+    exp:"마이크 타이슨(Mike Tyson)의 명언으로, 아무리 완벽한 전략도 실전에서 강펀치를 맞으면 무너질 수 있다는 현실을 유머러스하게 표현했습니다. 복싱뿐 아니라 인생 전반에 적용되는 통찰로 널리 알려졌습니다." },
+];
+
+const LABELS = ["A","B","C","D"];
+const TOTAL_TIME = 180;
+
+// ── State ────────────────────────────────────────────────────────────────────
+let state = {
+  division: "", gender: "", name: "",
+  current: 0, score: 0, answered: 0,
+  timeLeft: TOTAL_TIME, timerID: null,
+  busy: false, done: false,
+  wrongAnswers: []
+};
+
+// ── localStorage helpers ──────────────────────────────────────────────────────
+function loadRankings() { try { return JSON.parse(localStorage.getItem("tmt_rankings")||"[]"); } catch(e){ return []; } }
+function saveRankings(list) { localStorage.setItem("tmt_rankings", JSON.stringify(list)); }
+
+// ── Toggle ────────────────────────────────────────────────────────────────────
+function selectToggle(field, value, el) {
+  state[field] = value;
+  el.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Screen ────────────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  if(name === 'ranking') renderRanking();
+}
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ── Start flow ────────────────────────────────────────────────────────────────
+function startQuiz() {
+  const name = document.getElementById('name-input').value.trim();
+  const err = document.getElementById('start-error');
+  if (!state.division || !name) { err.style.display='block'; return; }
+  err.style.display='none';
+  state.name = name;
+
+  // Check duplicate
+  const existing = loadRankings();
+  const dup = existing.some(r => r.division===state.division && r.name===state.name);
+  if (dup) { document.getElementById('modal-dup').classList.add('active'); return; }
+
+  document.getElementById('modal-guide').classList.add('active');
+}
+
+function confirmStart() {
+  closeModal('modal-guide');
+  initQuiz();
+  showScreen('quiz');
+}
+
+// ── Quiz logic ────────────────────────────────────────────────────────────────
+function initQuiz() {
+  state.current = 0; state.score = 0; state.answered = 0;
+  state.timeLeft = TOTAL_TIME; state.busy = false; state.done = false;
+  state.wrongAnswers = []; state.startTime = Date.now();
+  clearInterval(state.timerID);
+  renderQuestion();
+  state.timerID = setInterval(tickTimer, 1000);
+}
+
+function tickTimer() {
+  state.timeLeft--;
+  const m = String(Math.floor(state.timeLeft/60)).padStart(2,'0'), s = String(state.timeLeft%60).padStart(2,'0'); document.getElementById('timer-num').textContent = m+':'+s;
+  if (state.timeLeft <= 0) {
+    clearInterval(state.timerID);
+    if (!state.done) finishQuiz();
+  }
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[state.current];
+  document.getElementById('quiz-badge').textContent = '퀴즈 ' + (state.current + 1);
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('feedback-text').textContent = '';
+  document.getElementById('feedback-text').className = 'feedback-text';
+  document.getElementById('counter-num').textContent = (state.current+1) + '/' + QUESTIONS.length;
+  document.getElementById('score-num').textContent = state.score;
+  const pct = (state.current / QUESTIONS.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  renderAnswerArea(q);
+}
+
+function renderAnswerArea(q) {
+  const area = document.getElementById('answer-area');
+  if (q.type === 'ox') {
+    area.innerHTML = `
+      <div class="ox-wrap">
+        <button class="ox-btn o-btn" id="btn-o" onclick="handleOX(true)">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <circle cx="26" cy="26" r="18" stroke="#2563EB" stroke-width="9" fill="none"/>
+          </svg>
+          <span style="font-size:14px; font-weight:700; color:#2563EB; letter-spacing:0.5px;">그렇다</span>
+        </button>
+        <button class="ox-btn x-btn" id="btn-x" onclick="handleOX(false)">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <line x1="12" y1="12" x2="40" y2="40" stroke="#EF4444" stroke-width="9" stroke-linecap="round"/>
+            <line x1="40" y1="12" x2="12" y2="40" stroke="#EF4444" stroke-width="9" stroke-linecap="round"/>
+          </svg>
+          <span style="font-size:14px; font-weight:700; color:#EF4444; letter-spacing:0.5px;">아니다</span>
+        </button>
+      </div>`;
+  } else {
+    const btns = q.options.map((opt, i) => `
+      <button class="mc-btn" id="mc-${i}" onclick="handleMC(${i})">
+        <span class="mc-text">${opt}</span>
+        <span class="mc-tag" id="mc-tag-${i}"></span>
+      </button>`).join('');
+    area.innerHTML = `<div class="mc-wrap">${btns}</div>`;
+  }
+}
+
+function handleOX(ans) {
+  if (state.busy || state.done) return;
+  const correct = ans === QUESTIONS[state.current].a;
+  processAnswer(correct, ans ? "O" : "X");
+  document.querySelectorAll('.ox-btn').forEach(b => b.classList.add('disabled'));
+}
+
+function handleMC(idx) {
+  if (state.busy || state.done) return;
+  const q = QUESTIONS[state.current];
+  const correct = idx === q.a;
+  // show colors
+  document.querySelectorAll('.mc-btn').forEach((b,i) => {
+    b.classList.add('disabled');
+    b.onclick = null;
+    if (i === q.a) { b.classList.add('correct'); document.getElementById('mc-tag-'+i).textContent='정답'; }
+    else if (i === idx && !correct) { b.classList.add('wrong-pick'); document.getElementById('mc-tag-'+i).textContent='내 답'; }
+  });
+  processAnswer(correct, idx);
+}
+
+function processAnswer(correct, selectedIdx) {
+  state.busy = true;
+  state.answered++;
+  if (correct) state.score++;
+  else {
+    state.wrongAnswers.push({ no: state.current+1, q: QUESTIONS[state.current], selectedIdx });
+  }
+  const fb = document.getElementById('feedback-text');
+  fb.textContent = correct ? '정답입니다!' : '오답입니다!';
+  fb.className = 'feedback-text ' + (correct ? 'feedback-correct' : 'feedback-wrong');
+  document.getElementById('score-num').textContent = state.score;
+  setTimeout(() => {
+    state.busy = false;
+    if (state.current + 1 >= QUESTIONS.length) { finishQuiz(); return; }
+    state.current++;
+    renderQuestion();
+  }, 900);
+}
+
+function finishQuiz() {
+  if (state.done) return;
+  state.done = true;
+  clearInterval(state.timerID);
+  state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  // Save ranking
+  const entry = { division: state.division, name: state.name, score: state.score, totalAnswered: state.answered, elapsed: state.elapsed, createdAt: new Date().toISOString() };
+  saveRankings([...loadRankings(), entry]);
+  renderResult();
+  showScreen('result');
+}
+
+// ── Result ────────────────────────────────────────────────────────────────────
+function renderResult() {
+  document.getElementById('result-score-text').textContent = state.score + '개';
+  document.getElementById('result-total-text').textContent = '풀이 시간 ' + formatTime(state.elapsed);
+  const rows = [
+    ['회원 구분', state.division], ['이름', state.name],
+    ['점수', state.score + '점'], ['풀이 시간', formatTime(state.elapsed)]
+  ];
+  document.getElementById('result-info').innerHTML = rows.map(([l,v],i) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:${i < rows.length-1 ? '1px solid #F3F4F6' : 'none'};">
+      <span style="font-size:14px;color:#6B7280;">${l}</span>
+      <span style="font-size:15px;font-weight:700;color:#111827;">${v}</span>
+    </div>`).join('');
+  renderWrongNote();
+}
+
+function renderWrongNote() {
+  const ws = state.wrongAnswers;
+  const sec = document.getElementById('wrong-note-section');
+  if (!ws.length) { sec.style.display='none'; return; }
+  sec.style.display='block';
+
+  // Header
+  sec.querySelector('.wrong-note-title').textContent = '오답노트';
+  sec.querySelector('.wrong-count-pill').textContent = ws.length + '개 틀림';
+
+  document.getElementById('wrong-list').innerHTML = ws.map((item, i) => {
+    const q = item.q;
+    const LABELS = ['A','B','C','D'];
+    const correctLabel = q.type==='ox' ? (q.a ? 'O' : 'X') : q.options[q.a];
+    const myLabel = q.type==='ox'
+      ? (item.selectedIdx === 'O' ? 'O' : 'X')
+      : (item.selectedIdx !== null ? q.options[item.selectedIdx] : '미응답');
+
+    // MC options removed per spec
+
+    return `<div class="acc-item" id="acc-item-${i}">
+      <button class="acc-header" onclick="toggleAcc(${i})">
+        <div class="acc-num">${item.no}</div>
+        <div class="acc-preview">
+          <div class="acc-preview-q">${q.q}</div>
+        </div>
+        <svg class="acc-chevron" id="acc-arrow-${i}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="acc-body" id="acc-body-${i}">
+        <!-- 문제 -->
+        <div class="acc-section">
+          <div class="acc-section-label q-label" style="font-size:14px;">문제</div>
+          <div class="acc-q-text" style="font-size:15px;">${q.q}</div>
+        </div>
+        <!-- 정답 -->
+        <div class="acc-section">
+          <div class="acc-section-label ans-label" style="font-size:14px;">정답</div>
+          <div class="acc-answer-text correct-text" style="font-size:15px;">${correctLabel}</div>
+        </div>
+        <!-- 해설 -->
+        <div class="acc-section">
+          <div class="acc-section-label exp-label" style="font-size:14px;">해설</div>
+          <div class="acc-explanation" style="font-size:15px;">${q.exp}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAcc(i) {
+  const item = document.getElementById('acc-item-'+i);
+  const body = document.getElementById('acc-body-'+i);
+  const arrow = document.getElementById('acc-arrow-'+i);
+  const isOpen = body.classList.contains('open');
+  // close all
+  document.querySelectorAll('.acc-body.open').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.acc-item.open').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.acc-chevron.open').forEach(b => b.classList.remove('open'));
+  // open clicked if was closed
+  if (!isOpen) {
+    body.classList.add('open');
+    item.classList.add('open');
+    arrow.classList.add('open');
+    setTimeout(() => item.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+  }
+}
+
+// ── Ranking ───────────────────────────────────────────────────────────────────
+let currentRankTab = '전체';
+
+function selectRankTab(tab, el) {
+  currentRankTab = tab;
+  document.querySelectorAll('.rank-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderRanking();
+}
+
+function renderRanking() {
+  const all = loadRankings();
+  const filtered = currentRankTab === '전체' ? all : all.filter(r => r.division === currentRankTab);
+  const list = filtered.sort((a,b) => {
+    if (b.score!==a.score) return b.score-a.score;
+    return new Date(a.createdAt)-new Date(b.createdAt);
+  });
+  const container = document.getElementById('ranking-list');
+  if (!list.length) {
+    container.innerHTML = `<div class="card" style="text-align:center;padding:48px 20px;">
+      <div style="font-size:48px;margin-bottom:12px;">🥊</div>
+      <div style="color:#9CA3AF;font-size:15px;">${currentRankTab} 기록이 없어요.<br>첫 번째 도전자가 되어보세요!</div>
+    </div>`;
+    return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  container.innerHTML = list.map((e,i) => {
+    const rank = i+1;
+    const cls = rank<=3 ? 'top'+rank : '';
+    const medal = rank<=3 ? `<span style="font-size:22px;">${medals[i]}</span>` : `<span style="font-weight:700;color:#6B7280;font-size:15px;min-width:24px;display:inline-block;text-align:center;">${rank}</span>`;
+    return `<div class="rank-item ${cls}">
+      <div style="min-width:28px;text-align:center;">${medal}</div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:15px;color:#111827;">${e.name}
+          <span style="font-weight:500;font-size:12px;color:#9CA3AF;margin-left:6px;">${e.division}</span>
+        </div>
+        <div style="font-size:14px;color:#374151;font-weight:600;margin-top:4px;">${e.elapsed !== undefined ? formatTime(e.elapsed) : ''}</div>
+      </div>
+      <div style="text-align:right;font-size:20px;font-weight:900;color:#EF4444;">${e.score}점</div>
+    </div>`;
+  }).join('');
+}
+
+function resetRankings() {
+  if (confirm('랭킹을 초기화할까요?')) { saveRankings([]); renderRanking(); }
+}
+
+function retryQuiz() {
+  initQuiz();
+  showScreen('quiz');
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+function openAdminModal() {
+  document.getElementById('admin-pw-input').value = '';
+  document.getElementById('admin-pw-error').style.display = 'none';
+  document.getElementById('modal-admin').classList.add('active');
+  setTimeout(() => document.getElementById('admin-pw-input').focus(), 100);
+}
+
+function confirmAdmin() {
+  const pw = document.getElementById('admin-pw-input').value;
+  if (pw === 'tmt777') {
+    closeModal('modal-admin');
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-pw-error').style.display = 'none';
+    renderAdminRecords();
+    document.getElementById('modal-admin-panel').classList.add('active');
+  } else {
+    document.getElementById('admin-pw-error').style.display = 'block';
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-pw-input').focus();
+  }
+}
+
+function renderAdminRecords() {
+  const list = loadRankings().sort((a,b) => {
+    if (b.score!==a.score) return b.score-a.score;
+    return new Date(a.createdAt)-new Date(b.createdAt);
+  });
+  const container = document.getElementById('admin-record-list');
+  if (!list.length) {
+    container.innerHTML = '<div style="text-align:center; color:#9CA3AF; font-size:13px; padding:16px 0;">기록이 없습니다.</div>';
+    return;
+  }
+  container.innerHTML = list.map((e, i) => `
+    <div style="display:flex; align-items:center; gap:10px; background:#F9FAFB; border-radius:12px; padding:12px 14px; border:1.5px solid #E5E7EB;">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:14px; font-weight:800; color:#111827;">${e.name}
+          <span style="font-size:12px; font-weight:500; color:#9CA3AF; margin-left:4px;">${e.division}</span>
+        </div>
+        <div style="font-size:12px; color:#6B7280; margin-top:2px;">${e.score}점 · ${e.elapsed !== undefined ? formatTime(e.elapsed) : ''}</div>
+      </div>
+      <button onclick="adminDeleteOne(${i})" style="flex-shrink:0; padding:7px 12px; border-radius:8px; border:1.5px solid #FECACA; background:#FFF1F2; color:#DC2626; font-size:12px; font-weight:700; cursor:pointer;">삭제</button>
+    </div>`).join('');
+}
+
+function adminDeleteOne(sortedIdx) {
+  const list = loadRankings().sort((a,b) => {
+    if (b.score!==a.score) return b.score-a.score;
+    return new Date(a.createdAt)-new Date(b.createdAt);
+  });
+  const target = list[sortedIdx];
+  if (!target) return;
+  if (confirm(`'${target.name}' 님의 기록을 삭제할까요?`)) {
+    const all = loadRankings();
+    const idx = all.findIndex(r => r.createdAt === target.createdAt);
+    if (idx !== -1) all.splice(idx, 1);
+    saveRankings(all);
+    renderAdminRecords();
+    renderRanking();
+  }
+}
+
+function adminDeleteAll() {
+  if (confirm('전체 랭킹 기록을 삭제할까요? 이 작업은 되돌릴 수 없습니다.')) {
+    saveRankings([]);
+    closeModal('modal-admin-panel');
+    renderRanking();
+  }
+}
+</script>
+</body>
+</html>
