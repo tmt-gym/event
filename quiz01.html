@@ -454,7 +454,18 @@ function selectToggle(field, value, el) {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  if(name === 'ranking') renderRanking();
+  if(name === 'ranking') {
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      firebase.database().ref('rankings').get().then(snapshot => {
+        const data = snapshot.val();
+        const list = data ? Object.entries(data).map(([key, val]) => ({ ...val, _key: key })) : [];
+        allRankingsCache = list;
+        renderRankingList(list);
+      });
+    } else {
+      renderRanking();
+    }
+  }
 }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
@@ -844,6 +855,24 @@ function adminDeleteAll() {
     }
   }
 }
+
+// 페이지 로드 시 Firebase 구독 즉시 시작
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      firebase.database().ref('rankings').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const list = data ? Object.entries(data).map(([key, val]) => ({ ...val, _key: key })) : [];
+        allRankingsCache = list;
+        if (document.getElementById('screen-ranking').classList.contains('active')) {
+          renderRankingList(list);
+        }
+      });
+      rankingSubscribed = true;
+      window.firebaseReady = true;
+    }
+  }, 500);
+});
 </script>
 </body>
 </html>
