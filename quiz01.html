@@ -269,7 +269,7 @@ body { background: #F1F5F9; display: flex; justify-content: center; min-height: 
           </div>
           <div style="display:flex; align-items:flex-start; gap:8px;">
             <span style="min-width:18px; height:18px; border-radius:99px; background:#EF4444; color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">2</span>
-            <span style="font-size:15px; color:#374151; font-weight:500; line-height:1.5;">정답 수가 같으면 더 빨리 제출한 사람이 앞 순위가 됩니다.</span>
+            <span style="font-size:15px; color:#374151; font-weight:500; line-height:1.5;">정답 수가 같으면 <span style="color:#EF4444; font-weight:700;">풀이 시간이 짧은 사람</span>이 앞 순위가 됩니다.</span>
           </div>
         </div>
       </div>
@@ -750,7 +750,7 @@ function renderRankingList(all) {
   const filtered = currentRankTab === '전체' ? all : all.filter(r => r.division === currentRankTab);
   const list = [...filtered].sort((a,b) => {
     if (b.score!==a.score) return b.score-a.score;
-    return new Date(a.createdAt)-new Date(b.createdAt);
+    return (a.elapsed||0)-(b.elapsed||0);
   });
   const container = document.getElementById('ranking-list');
   if (!list.length) {
@@ -844,7 +844,7 @@ function renderAdminRecords() {
   const doRender = (list) => {
     const sorted = [...list].sort((a,b) => {
       if (b.score!==a.score) return b.score-a.score;
-      return new Date(a.createdAt)-new Date(b.createdAt);
+      return (a.elapsed||0)-(b.elapsed||0);
     });
     if (!sorted.length) {
       container.innerHTML = '<div style="text-align:center; color:#9CA3AF; font-size:13px; padding:16px 0;">기록이 없습니다.</div>';
