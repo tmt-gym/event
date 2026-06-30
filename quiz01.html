@@ -532,9 +532,11 @@ function initQuiz() {
 
 function tickTimer() {
   state.timeLeft--;
-  const m = String(Math.floor(state.timeLeft/60)).padStart(2,'0'), s = String(state.timeLeft%60).padStart(2,'0'); document.getElementById('timer-num').textContent = m+':'+s;
+  const m = String(Math.floor(state.timeLeft/60)).padStart(2,'0'), s = String(state.timeLeft%60).padStart(2,'0');
+  document.getElementById('timer-num').textContent = m+':'+s;
   if (state.timeLeft <= 0) {
     clearInterval(state.timerID);
+    state.timeLeft = 0;
     if (!state.done) finishQuiz();
   }
 }
@@ -625,7 +627,7 @@ function finishQuiz() {
   if (state.done) return;
   state.done = true;
   clearInterval(state.timerID);
-  state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  state.elapsed = Math.min(Math.floor((Date.now() - state.startTime) / 1000), TOTAL_TIME);
 
   const entry = {
     division: state.division,
